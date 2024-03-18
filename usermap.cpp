@@ -1,14 +1,11 @@
 #include "usermap.h"
 #include <cstdlib>
 #include <ctime>
+#include <memory>
 
-Tile::Tile(unsigned x, unsigned y, bool wall)
-    // m_coords(Point(x, y)), m_wall(wall)
-{
-    m_coords.x = x;
-    m_coords.y = y;
-    m_wall = wall;
-}
+Tile::Tile(int x, int y, bool wall)
+    : m_coords{x, y}, m_wall{wall}
+{}
 
 Point Tile::getCoords()
 {
@@ -36,26 +33,25 @@ void Tile::setPrevious(Tile* prev)
 }
 
 UserMap::UserMap(unsigned width, unsigned height)
-    // m_size(MapSize(width, height))
+   : m_size{width, height}
 {
-    m_size.width = width;
-    m_size.height = height;
-    std::srand(42);
+    std::srand(std::time(0));
     bool wall = false;
     for (unsigned i = 0; i < m_size.height; ++i) {
         for (unsigned j = 0; j < m_size.width; ++j) {
-            if (j%2 == 0) {
+            if (std::rand() > RAND_MAX/3){
                 wall = false;
-            } else if (std::rand() > RAND_MAX/3){
-                wall = true;
             } else {
-                wall = false;
+                wall = true;
             }
-            m_tiles.push_back(new Tile(j, i, wall));
+            std::shared_ptr <Tile> tile_ptr (new Tile(j, i, wall));
+            m_tiles.push_back(tile_ptr);
+
         }
     }
     connectMap();
 }
+
 
 unsigned int UserMap::getWidth()
 {
@@ -71,29 +67,34 @@ void UserMap::connectMap() {
 
     for (unsigned j = 0; j < m_size.height; ++j) {
         for (unsigned i = 0; i < m_size.width; ++i) {
-            m_tiles.at(i + m_size.width*j)->neighbors.push_back(nullptr);
-            m_tiles.at(i + m_size.width*j)->neighbors.push_back(nullptr);
-            m_tiles.at(i + m_size.width*j)->neighbors.push_back(nullptr);
-            m_tiles.at(i + m_size.width*j)->neighbors.push_back(nullptr);
+            // m_tiles.at(i + m_size.width*j)->neighbors.push_back(nullptr);
+            // m_tiles.at(i + m_size.width*j)->neighbors.push_back(nullptr);
+            // m_tiles.at(i + m_size.width*j)->neighbors.push_back(nullptr);
+            // m_tiles.at(i + m_size.width*j)->neighbors.push_back(nullptr);
 
-
+            Tile* tmp = m_tiles.at(i + m_size.width*j).get();
+            Tile* mbNeighbor = nullptr;
             if (i > 0) {
-                if (!m_tiles.at(i + m_size.width*j - 1)->isWall())
-                     m_tiles.at(i + m_size.width*j)->neighbors.at(LEFT) = (m_tiles.at(i + m_size.width*j - 1));
+                mbNeighbor = m_tiles.at(i + m_size.width*j - 1).get();
+                if (!mbNeighbor->isWall())
+                    tmp->neighbors.at(LEFT) = mbNeighbor;
             }
 
             if (i < (m_size.width - 1)) {
-                if (!m_tiles.at(i + m_size.width*j + 1)->isWall())
-                     m_tiles.at(i + m_size.width*j)->neighbors.at(RIGHT) = (m_tiles.at(i + m_size.width*j + 1));
+                mbNeighbor = m_tiles.at(i + m_size.width*j + 1).get();
+                if (!mbNeighbor->isWall())
+                    tmp->neighbors.at(RIGHT) = mbNeighbor;
             }
 
             if (j > 0) {
-                if (!m_tiles.at(i + m_size.width*(j - 1))->isWall())
-                     m_tiles.at(i + m_size.width*j)->neighbors.at(UP) = (m_tiles.at(i + m_size.width*(j - 1)));
+                mbNeighbor = m_tiles.at(i + m_size.width*(j - 1)).get();
+                if (!mbNeighbor->isWall())
+                    tmp->neighbors.at(UP) = mbNeighbor;
             }
             if (j < (m_size.height - 1)) {
-                if (!m_tiles.at(i + m_size.width*(j + 1))->isWall())
-                     m_tiles.at(i + m_size.width*j)->neighbors.at(DOWN) = (m_tiles.at(i + m_size.width*(j + 1)));
+                mbNeighbor = m_tiles.at(i + m_size.width*(j + 1)).get();
+                if (!mbNeighbor->isWall())
+                    tmp->neighbors.at(DOWN) = mbNeighbor;
             }
         }
     }

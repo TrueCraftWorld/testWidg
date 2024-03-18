@@ -11,7 +11,7 @@ PathSearch::PathSearch()
 
 void PathSearch::printPath(UserMap& graph, Point goal)
 {
-    Tile* backTrackStart = graph.m_tiles.at(goal.x + goal.y*graph.getWidth());
+    Tile* backTrackStart = graph.m_tiles.at(goal.x + goal.y*graph.getWidth()).get();
     unsigned curNumber;
     while (backTrackStart != (backTrackStart->getPrevious())) {
             curNumber = backTrackStart->getCoords().x + backTrackStart->getCoords().y * graph.getWidth();
@@ -28,7 +28,7 @@ bool PathSearch::breadthFirstSearch(UserMap& graph, Point start, Point goal)
     std::queue<Tile*> knownBorder; //only edge of known area
     std::unordered_set<Tile*> knownTiles; //all known tiles
     bool found = false;
-    Tile* beingCheked = graph.m_tiles.at(start.x + start.y*graph.getWidth());
+    Tile* beingCheked = graph.m_tiles.at(start.x + start.y*graph.getWidth()).get();
     knownBorder.push(beingCheked);
     knownTiles.insert(beingCheked);
     unsigned curNumber = 0;
