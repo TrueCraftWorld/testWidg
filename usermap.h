@@ -4,27 +4,11 @@
 #include <vector>
 #include <array>
 #include <memory>
+#include <QPoint>
 
-struct Point
-{
-    bool operator==(const Point& right);
+#include <QSize>
 
-    int x;
-    int y;
 
-};
-
-struct MapSize
-{
-    unsigned width;
-    unsigned height;
-};
-
-struct MOVE
-{
-    int delta_x;
-    int delta_y;
-};
 
 enum {UP, RIGHT, DOWN, LEFT};
 
@@ -34,8 +18,8 @@ public:
     Tile() = delete;
     Tile(int x, int y, bool wall =false);
 
-    Point getCoords();
-    setCoords(const Point&);
+    QPoint getCoords();
+    setCoords(const QPoint&);
 
     void setWall(bool);
     bool isWall();
@@ -43,7 +27,7 @@ public:
     std::array<Tile*, 4> neighbors = {nullptr,nullptr,nullptr,nullptr};
     // std::array<Tile*, 8> neighbors;
 private:
-    Point m_coords;
+    QPoint m_coords;
     bool m_wall;
 
 public:
@@ -60,14 +44,14 @@ private:
 class UserMap
 {
 public:
-    UserMap(unsigned width, unsigned height);
+    UserMap(int width, int height);
     ~UserMap(){}
 
-    unsigned getWidth();
-    unsigned getHeight();
+    int getWidth();
+    int getHeight();
     std::vector<std::shared_ptr<Tile>> m_tiles;
 private:
-    MapSize m_size;
+    QSize m_size;
     void connectMap();
 
 

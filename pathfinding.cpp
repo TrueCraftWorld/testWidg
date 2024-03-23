@@ -1,34 +1,51 @@
 #include "pathfinding.h"
 #include "usermap.h"
+#include <QObject>
 #include <queue>
 #include <unordered_set>
 #include <iostream>
 
-PathSearch::PathSearch()
+PathSearch::PathSearch(QObject * parent)
 {
-
+    // Q_UNUSED parent;
 }
 
-void PathSearch::printPath(UserMap& graph, Point goal)
+void PathSearch::setGraph(UserMap * graph)
 {
-    Tile* backTrackStart = graph.m_tiles.at(goal.x + goal.y*graph.getWidth()).get();
+    m_graph = graph;
+}
+
+void PathSearch::printPath(UserMap& graph, QPoint goal)
+{
+    Tile* backTrackStart = graph.m_tiles.at(goal.x() + goal.y()*graph.getWidth()).get();
     unsigned curNumber;
     while (backTrackStart != (backTrackStart->getPrevious())) {
-            curNumber = backTrackStart->getCoords().x + backTrackStart->getCoords().y * graph.getWidth();
+            curNumber = backTrackStart->getCoords().x() + backTrackStart->getCoords().y() * graph.getWidth();
             std::cout << "N=" << curNumber << "<--";
             backTrackStart = (backTrackStart->getPrevious());
+            if (backTrackStart == nullptr) return;
     }
-    curNumber = backTrackStart->getCoords().x + backTrackStart->getCoords().y * graph.getWidth();
+    curNumber = backTrackStart->getCoords().x() + backTrackStart->getCoords().y() * graph.getWidth();
     std::cout << "N=" << curNumber;
     std::cout << std::endl;
 }
 
-bool PathSearch::breadthFirstSearch(UserMap& graph, Point start, Point goal)
+void PathSearch::setStart(QPoint start)
+{
+     m_start = start;
+}
+
+void PathSearch::setGoal(QPoint goal)
+{
+    m_goal = goal;
+}
+
+bool PathSearch::breadthFirstSearch(QPoint start, QPoint goal)
 {
     std::queue<Tile*> knownBorder; //only edge of known area
     std::unordered_set<Tile*> knownTiles; //all known tiles
     bool found = false;
-    Tile* beingCheked = graph.m_tiles.at(start.x + start.y*graph.getWidth()).get();
+    Tile* beingCheked = m_graph->m_tiles.at(start.x() + start.y()*m_graph->getWidth()).get();
     knownBorder.push(beingCheked);
     knownTiles.insert(beingCheked);
     unsigned curNumber = 0;
@@ -38,7 +55,7 @@ bool PathSearch::breadthFirstSearch(UserMap& graph, Point start, Point goal)
     while (!knownBorder.empty() /*&& (!found)*/) {
         beingCheked = knownBorder.front();
         knownBorder.pop(); // at this point our location in not ON border but inside
-        curNumber = beingCheked->getCoords().x + beingCheked->getCoords().y * graph.getWidth();
+        curNumber = beingCheked->getCoords().x() + beingCheked->getCoords().y() * m_graph->getWidth();
         std::cout << "  Visiting N=" << curNumber << std::endl;
         for (Tile* foundling : beingCheked->neighbors) {
             if (foundling != nullptr) { //our neighbors are not walls
@@ -57,4 +74,11 @@ bool PathSearch::breadthFirstSearch(UserMap& graph, Point start, Point goal)
     }
     if (found) return true;
     else return false;
+}
+
+bool PathSearch::bFS()
+{
+    bool result = breadthFirstSearch(m_start, m_goal);
+    emit pathFound(result);
+    return result;
 }

@@ -1,8 +1,10 @@
 #include "mainwindow.h"
 #include <iostream>
 #include <QApplication>
+#include <QThread>
 #include "usermap.h"
 #include "pathfinding.h"
+#include "threadwrapper.h"
 
 int main(int argc, char *argv[])
 {
@@ -25,11 +27,45 @@ int main(int argc, char *argv[])
         std::cout << std::endl;
     }
 
-    if (PathSearch::breadthFirstSearch(some_map, Point{0,0}, Point{6,0})) {
-        PathSearch::printPath(some_map,  Point{6,0});
-    } else {
-        std::cout << "NO PATH!" << std::endl;
-    }
+    // if (PathSearch::breadthFirstSearch(some_map, Point{0,0}, Point{6,0})) {
+    //     PathSearch::printPath(some_map,  Point{6,0});
+    // } else {
+    //     std::cout << "NO PATH!" << std::endl;
+    // }
+
+    // Controller * ctrl = new Controller();
+    // ctrl->operate(some_map, Point{0,0}, Point{6,0});
+    // QObject::connect(ctrl, &Controller::results, [=](bool res) mutable {
+    //     if (res) {
+    //         PathSearch::printPath(some_map,  Point{6,0});
+    //     } else {
+    //         std::cout << "NO PATH!" << std::endl;
+    //     }
+    // });
+
+    PathSearch* pS = new PathSearch();
+    pS->setGraph(&some_map);
+    pS->setStart(QPoint(0,0));
+    pS->setGoal(QPoint(6,0));
+
+    QThread * thread = new QThread();
+    pS->moveToThread(thread);
+    QObject::connect(thread, &QThread::started, pS, &PathSearch::bFS);
+    QObject::connect(thread, &QThread::finished, pS, &QObject::deleteLater);
+    QObject::connect(pS, &PathSearch::pathFound, [=](bool result) mutable {
+        if (result) PathSearch::printPath(some_map, QPoint(6,0));
+        else std::cout << "NO PATH!" << std::endl;
+    });
+    QObject::connect(pS, &PathSearch::pathFound, thread, &QThread::terminate);
+    thread->start();
+
+
+    // if (pS->bFS()) {
+    //     PathSearch::printPath(some_map, QPoint(6,0));
+    // } else {
+    //     std::cout << "NO PATH!" << std::endl;
+    // }
+
 
     w.show();
     return a.exec();

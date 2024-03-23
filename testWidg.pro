@@ -13,12 +13,14 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     pathfinding.cpp \
+    threadwrapper.cpp \
     usermap.cpp
 
 HEADERS += \
     drawclass.h \
     mainwindow.h \
     pathfinding.h \
+    threadwrapper.h \
     usermap.h
 
 FORMS +=
