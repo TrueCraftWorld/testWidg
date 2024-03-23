@@ -1,6 +1,4 @@
-QT       += core gui
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT       += core gui widgets
 
 CONFIG += c++17
 
@@ -9,19 +7,19 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    drawclass.cpp \
     main.cpp \
     mainwindow.cpp \
     pathfinding.cpp \
-    threadwrapper.cpp \
-    usermap.cpp
+    usermap.cpp \
+    visualmap.cpp \
+    visualtile.cpp
 
 HEADERS += \
-    drawclass.h \
     mainwindow.h \
     pathfinding.h \
-    threadwrapper.h \
-    usermap.h
+    usermap.h \
+    visualmap.h \
+    visualtile.h
 
 FORMS +=
 
