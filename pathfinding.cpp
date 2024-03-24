@@ -1,9 +1,11 @@
-#include "pathfinding.h"
+
 #include "usermap.h"
 #include <QObject>
 #include <queue>
 #include <unordered_set>
 #include <iostream>
+
+#include "pathfinding.h"
 
 PathSearch::PathSearch(QObject * parent)
 {
@@ -15,20 +17,22 @@ void PathSearch::setGraph(UserMap * graph)
     m_graph = graph;
 }
 
-void PathSearch::printPath(UserMap* graph, QPoint goal)
+void PathSearch::highlightPath(UserMap* graph, QPoint goal, bool hide)
 {
-    Tile* backTrackStart = graph->m_tiles.at(goal.x() + goal.y()*graph->getWidth()).get();
-    unsigned curNumber;
+    Tile* backTrackStart = graph->tileAt(goal.x() + goal.y()*graph->getWidth());
+
     while (backTrackStart != (backTrackStart->getPrevious())) {
-            curNumber = backTrackStart->getCoords().x() + backTrackStart->getCoords().y() * graph->getWidth();
-            std::cout << "N=" << curNumber << "<--";
+            // std::cout << "N=" << curNumber << "<--";
             backTrackStart = (backTrackStart->getPrevious());
             if (backTrackStart == nullptr) return;
+            backTrackStart->setState(hide ? Tile::States::EMPTY : Tile::States::PATH);
     }
-    curNumber = backTrackStart->getCoords().x() + backTrackStart->getCoords().y() * graph->getWidth();
-    std::cout << "N=" << curNumber;
-    std::cout << std::endl;
+
+    std::cout << "Path" << std::endl;
+
 }
+
+
 
 void PathSearch::setStart(QPoint start)
 {
@@ -40,12 +44,17 @@ void PathSearch::setGoal(QPoint goal)
     m_goal = goal;
 }
 
+QPoint PathSearch::getGoal()
+{
+    return m_goal;
+}
+
 bool PathSearch::breadthFirstSearch(QPoint start, QPoint goal)
 {
     std::queue<Tile*> knownBorder; //only edge of known area
     std::unordered_set<Tile*> knownTiles; //all known tiles
     bool found = false;
-    Tile* beingCheked = m_graph->m_tiles.at(start.x() + start.y()*m_graph->getWidth()).get();
+    Tile* beingCheked = m_graph->tileAt(start.x() + start.y()*m_graph->getWidth());
     knownBorder.push(beingCheked);
     knownTiles.insert(beingCheked);
     unsigned curNumber = 0;
@@ -72,8 +81,7 @@ bool PathSearch::breadthFirstSearch(QPoint start, QPoint goal)
             }
         }
     }
-    if (found) return true;
-    else return false;
+    return found;
 }
 
 bool PathSearch::bFS()

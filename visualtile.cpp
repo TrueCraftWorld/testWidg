@@ -1,16 +1,19 @@
+#include "usermap.h"
+
 #include "visualtile.h"
 
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
-VisualTile::VisualTile(const QColor &n_color, int n_x, int n_y, States n_state)
-    : x(n_x), y(n_y), color(n_color), m_state(n_state)
-{
-    setZValue((x + y) % 2);
-    setFlags(ItemIsSelectable);
-    setAcceptHoverEvents(true);
-}
+// VisualTile::VisualTile(const QColor &n_color, int n_x, int n_y, Tile::States n_state)
+//     : x(n_x), y(n_y), color(n_color), m_state(n_state)
+// {
+//     setZValue((x + y) % 2);
+//     setFlags(ItemIsSelectable);
+//     setAcceptHoverEvents(true);
+// }
+
 
 QRectF VisualTile::boundingRect() const
 {
@@ -58,6 +61,20 @@ void VisualTile::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 
     painter->drawRect(QRect(3, 3, 44, 44));
     painter->setBrush(b);
+}
+
+void VisualTile::setColor(const QColor &n_color)
+{
+    color = n_color;
+}
+
+void VisualTile::setCoords(int n_x, int n_y)
+{
+    x = n_x;
+    y = n_y;
+    setZValue((x + y) % 2);
+    setFlags(ItemIsSelectable);
+    setAcceptHoverEvents(true);
 }
 
 void VisualTile::mousePressEvent(QGraphicsSceneMouseEvent *event)

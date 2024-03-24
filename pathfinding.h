@@ -12,10 +12,12 @@ public:
     // PathSearch(UserMap *, QObject * parent = nullptr);
     bool breadthFirstSearch(QPoint start, QPoint goal = QPoint(0,0));
     bool bFS();
-    static void printPath(UserMap* ,QPoint);
+    static void highlightPath(UserMap* ,QPoint, bool);
+
     void setGraph(UserMap* );
     void setStart(QPoint);
     void setGoal(QPoint);
+    QPoint getGoal();
     UserMap * getGraph(void);
 signals:
     void pathFound(bool);

@@ -2,19 +2,21 @@
 #define VISUALTILE_H
 
 #include <QColor>
-#include <QGraphicsItem>
+#include <QGraphicsObject>
 
-enum class States{EMPTY, WALL, START, STOP, PATH};
 
-class VisualTile : public QGraphicsItem
+
+class VisualTile : public QGraphicsObject
 {
-    // Q_OBJECT
+    Q_OBJECT
 public:
-    VisualTile(const QColor &color, int x, int y, States n_state);
+    // VisualTile(const QColor &color, int x, int y, States n_state);
 
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWidget *widget) override;
+    void setColor(const QColor& );
+    void setCoords(int n_x, int n_y);
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
@@ -24,7 +26,7 @@ private:
     int x;
     int y;
     QColor color;
-    States m_state;
+    // States m_state;
 };
 
 #endif // VISUALTILE_H

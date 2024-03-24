@@ -35,13 +35,20 @@ void MainWindow::generateMap()
 
     for (unsigned i = 0; i < height; ++i) {
         for (unsigned j = 0; j < width; ++j) {
-            tmp = m_map->m_tiles.at(j + width*i)->isWall();
-            QColor color = tmp ? Qt::black : Qt::blue;
-            QGraphicsItem *item = new VisualTile(color, j, i, tmp ? States::WALL : States::EMPTY);
+            tmp = m_map->tileAt(j + width*i)->isWall();
+            QColor color = tmp ? Qt::black : Qt::gray;
+            VisualTile *item = new VisualTile();
+            item->setColor(color);
+            item->setCoords(j, i);
             // std::cout  << " N=" << (j + width*i);
             // std::cout  <<((tmp == true) ? "X/" : " /");
             item->setPos(QPointF((j+1)*50, (i+1)*50));
-            scene->addItem(item);
+
+            QObject::connect(m_map->tileAt(j,i), &Tile::stateChanged, item, [=](){
+                item->setColor(m_map->tileAt(j,i)->getState() == Tile::States::PATH ? Qt::green : Qt::gray);
+            });
+
+            scene->addItem(static_cast<QGraphicsObject *>(item));
         }
         // for (unsigned j = 0; j < width; ++j) std::cout << "__";
         // std::cout << std::endl;

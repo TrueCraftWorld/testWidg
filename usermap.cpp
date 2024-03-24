@@ -4,24 +4,42 @@
 #include <memory>
 #include <QPoint>
 #include <QSize>
+#include <QSharedPointer>
 
-Tile::Tile(int x, int y, bool wall)
-    : m_coords{x, y}, m_wall{wall}
-{}
+// Tile::Tile(int x, int y, bool wall)
+//     : m_coords{x, y}, m_wall{wall}
+// {}
 
 QPoint Tile::getCoords()
 {
     return m_coords;
 }
 
+void Tile::setCoords(const QPoint &coords)
+{
+    m_coords = coords;
+}
+
 void Tile::setWall(bool wall)
 {
-    m_wall = wall;
+    if (wall) m_state = States::WALL;
 }
 
 bool Tile::isWall()
 {
-    return m_wall;
+    return (m_state == States::WALL);
+}
+
+Tile::States Tile::getState()
+{
+    return m_state;
+}
+
+void Tile::setState(States state)
+{
+    if (m_state == state) return;
+    m_state = state;
+    emit stateChanged();
 }
 
 Tile* Tile::getPrevious()
@@ -41,13 +59,16 @@ UserMap::UserMap(int width, int height)
     bool wall = false;
     for (int i = 0; i < m_size.height(); ++i) {
         for (int j = 0; j < m_size.width(); ++j) {
-            if (std::rand() > RAND_MAX/3){
+            if (std::rand() > RAND_MAX/4){
                 wall = false;
             } else {
                 wall = true;
             }
             if (i == 0 && j == 0)  wall = false;
-            std::shared_ptr <Tile> tile_ptr (new Tile(j, i, wall));
+            QSharedPointer<Tile> tile_ptr (new Tile());
+            tile_ptr->setCoords(QPoint(j,i));
+            tile_ptr->setWall(wall);
+
             m_tiles.push_back(tile_ptr);
 
         }
@@ -66,10 +87,20 @@ int UserMap::getHeight()
     return m_size.height();
 }
 
+Tile* UserMap::tileAt(int index)
+{
+    return m_tiles.at(index).get();
+}
+
+Tile* UserMap::tileAt(int x, int y)
+{
+    return tileAt(x + (y * m_size.width()) );
+}
+
 void UserMap::connectMap() {
 
-    for (unsigned j = 0; j < m_size.height(); ++j) {
-        for (unsigned i = 0; i < m_size.width(); ++i) {
+    for (int j = 0; j < m_size.height(); ++j) {
+        for (int i = 0; i < m_size.width(); ++i) {
             // m_tiles.at(i + m_size.width()*j)->neighbors.push_back(nullptr);
             // m_tiles.at(i + m_size.width()*j)->neighbors.push_back(nullptr);
             // m_tiles.at(i + m_size.width()*j)->neighbors.push_back(nullptr);

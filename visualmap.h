@@ -13,6 +13,8 @@ QT_END_NAMESPACE
 
 class VisualMap;
 
+
+
 class GraphicsView : public QGraphicsView
 {
     Q_OBJECT
@@ -25,6 +27,9 @@ private:
 private:
     VisualMap *m_map;
 };
+
+
+
 
 class VisualMap : public QFrame
 {
@@ -48,7 +53,7 @@ private:
     GraphicsView *graphicsView;
     QPushButton *findPathButton;
 
-    qint32 zoomLevel = 250;
+    qint32 zoomLevel = 0;
 };
 
 #endif // VISUALMAP_H
