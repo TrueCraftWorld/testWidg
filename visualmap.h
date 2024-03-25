@@ -53,7 +53,7 @@ private:
     GraphicsView *graphicsView;
     QPushButton *findPathButton;
 
-    qint32 zoomLevel = 0;
+    qint32 zoomLevel = 250;
 };
 
 #endif // VISUALMAP_H

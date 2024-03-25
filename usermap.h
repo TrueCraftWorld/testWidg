@@ -7,6 +7,8 @@
 #include <QObject>
 #include <QSize>
 #include <QVector>
+#include <QSharedPointer>
+#include <iostream>
 
 // enum class States{EMPTY, WALL, START, STOP, PATH};
 
@@ -56,23 +58,32 @@ private:
 };
 
 
-class UserMap
+class UserMap : public QObject
 {
+    Q_OBJECT
 public:
-    UserMap(int width, int height);
-    ~UserMap();
+    explicit UserMap(QObject *_parent = nullptr) {}
+    // UserMap(QWidget *parent = nullptr, int width=10, int height=10, QPoint goal = QPoint(0,0));
+    // ~UserMap();
+
+    void setSize(QSize size);
+    void create();
 
     int getWidth();
     int getHeight();
     void addTile(QSharedPointer<Tile>);
     Tile* tileAt(int index);
     Tile* tileAt(int x, int y);
+    void highlightPath(QPoint, bool);
+    void setGoal(QPoint);
+    void unsetGoal(QPoint);
+    QPoint getGoal();
+
 private:
     QVector<QSharedPointer<Tile>> m_tiles;
     QSize m_size;
+    QPoint m_goal;
     void connectMap();
-
-
 };
 
 

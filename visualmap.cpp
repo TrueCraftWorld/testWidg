@@ -15,12 +15,14 @@ void GraphicsView::wheelEvent(QWheelEvent *e)
 VisualMap::VisualMap(const QString &name, QWidget *parent)
     : QFrame(parent)
 {
+
     graphicsView = new GraphicsView(this);
-    graphicsView->setRenderHint(QPainter::Antialiasing, false);
+    // graphicsView->setRenderHint(QPainter::Antialiasing, false);
     graphicsView->setDragMode(QGraphicsView::RubberBandDrag);
     graphicsView->setOptimizationFlags(QGraphicsView::DontSavePainterState);
     graphicsView->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
     graphicsView->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+    // graphicsView->
 
 
     // Label layout

@@ -48,16 +48,14 @@ int main(int argc, char *argv[])
     PathSearch* pS = new PathSearch();
     pS->setGraph(w.getMap());
     pS->setStart(QPoint(0,0));
-    pS->setGoal(QPoint(QRandomGenerator::global()->bounded(1, 499),QRandomGenerator::global()->bounded(1, 499)));
+
 
     QThread * thread = new QThread();
     pS->moveToThread(thread);
     QObject::connect(thread, &QThread::started, pS, &PathSearch::bFS);
+    QObject::connect(thread, &QThread::started, &w, &MainWindow::setSearch);
     QObject::connect(thread, &QThread::finished, pS, &QObject::deleteLater);
-    QObject::connect(pS, &PathSearch::pathFound, [&](bool result) mutable {
-        if (result) PathSearch::highlightPath(w.getMap(), pS->getGoal(), false);
-        else std::cout << "NO PATH!" << std::endl;
-    });
+    QObject::connect(thread, &QThread::finished, &w, &MainWindow::unsetSearch);
     QObject::connect(pS, &PathSearch::pathFound, thread, &QThread::quit);
     thread->start();
 

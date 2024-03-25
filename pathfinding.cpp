@@ -3,7 +3,7 @@
 #include <QObject>
 #include <queue>
 #include <unordered_set>
-#include <iostream>
+
 
 #include "pathfinding.h"
 
@@ -17,20 +17,21 @@ void PathSearch::setGraph(UserMap * graph)
     m_graph = graph;
 }
 
-void PathSearch::highlightPath(UserMap* graph, QPoint goal, bool hide)
-{
-    Tile* backTrackStart = graph->tileAt(goal.x() + goal.y()*graph->getWidth());
+// void PathSearch::highlightPath(UserMap* graph, QPoint goal, bool hide)
+// {
+//     Tile* backTrackStart = graph->tileAt(goal.x() + goal.y()*graph->getWidth());
 
-    while (backTrackStart != (backTrackStart->getPrevious())) {
-            // std::cout << "N=" << curNumber << "<--";
-            backTrackStart = (backTrackStart->getPrevious());
-            if (backTrackStart == nullptr) return;
-            backTrackStart->setState(hide ? Tile::States::EMPTY : Tile::States::PATH);
-    }
-
-    std::cout << "Path" << std::endl;
-
-}
+//     while (backTrackStart != (backTrackStart->getPrevious())) {
+//             // std::cout << "N=" << curNumber << "<--";
+//         backTrackStart = (backTrackStart->getPrevious());
+//         if (backTrackStart == nullptr) {
+//             std::cout << "fail" << std::endl;
+//             return;
+//         }
+//         backTrackStart->setState(hide ? Tile::States::EMPTY : Tile::States::PATH);
+//     }
+//     std::cout << "Success" << std::endl;
+// }
 
 
 
@@ -39,17 +40,9 @@ void PathSearch::setStart(QPoint start)
      m_start = start;
 }
 
-void PathSearch::setGoal(QPoint goal)
-{
-    m_goal = goal;
-}
 
-QPoint PathSearch::getGoal()
-{
-    return m_goal;
-}
 
-bool PathSearch::breadthFirstSearch(QPoint start, QPoint goal)
+bool PathSearch::breadthFirstSearch(QPoint start)
 {
     std::queue<Tile*> knownBorder; //only edge of known area
     std::unordered_set<Tile*> knownTiles; //all known tiles
@@ -72,21 +65,16 @@ bool PathSearch::breadthFirstSearch(QPoint start, QPoint goal)
                     knownTiles.insert(foundling);
                     knownBorder.push(foundling);
                     foundling->setPrevious(beingCheked);
-                    if (foundling->getCoords() == goal) {
-                        std::cout << "  found goal" << std::endl;
-                        found = true;
-                        // break;
-                    }
                 }
             }
         }
     }
-    return found;
+    return true;
 }
 
 bool PathSearch::bFS()
 {
-    bool result = breadthFirstSearch(m_start, m_goal);
+    bool result = breadthFirstSearch(m_start);
     emit pathFound(result);
     return result;
 }

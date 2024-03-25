@@ -22,12 +22,12 @@ void Tile::setCoords(const QPoint &coords)
 
 void Tile::setWall(bool wall)
 {
-    if (wall) m_state = States::WALL;
+    if (wall) m_state = Tile::States::WALL;
 }
 
 bool Tile::isWall()
 {
-    return (m_state == States::WALL);
+    return (m_state == Tile::States::WALL);
 }
 
 Tile::States Tile::getState()
@@ -35,7 +35,7 @@ Tile::States Tile::getState()
     return m_state;
 }
 
-void Tile::setState(States state)
+void Tile::setState(Tile::States state)
 {
     if (m_state == state) return;
     m_state = state;
@@ -52,10 +52,18 @@ void Tile::setPrevious(Tile* prev)
     m_previous = prev;
 }
 
-UserMap::UserMap(int width, int height)
-   : m_size(width, height)
+
+void UserMap::setSize(QSize size)
 {
+    m_size = size;
+}
+
+void UserMap::create()
+{
+    if (!m_size.isValid()) return;
+    // m_tiles.resize(m_size.width()*m_size.height());
     std::srand(std::time(0));
+
     bool wall = false;
     for (int i = 0; i < m_size.height(); ++i) {
         for (int j = 0; j < m_size.width(); ++j) {
@@ -66,6 +74,7 @@ UserMap::UserMap(int width, int height)
             }
             if (i == 0 && j == 0)  wall = false;
             QSharedPointer<Tile> tile_ptr (new Tile());
+
             tile_ptr->setCoords(QPoint(j,i));
             tile_ptr->setWall(wall);
 
@@ -75,7 +84,6 @@ UserMap::UserMap(int width, int height)
     }
     connectMap();
 }
-
 
 int UserMap::getWidth()
 {
@@ -89,12 +97,35 @@ int UserMap::getHeight()
 
 Tile* UserMap::tileAt(int index)
 {
+    if (m_tiles.size() <= index) return nullptr;
     return m_tiles.at(index).get();
 }
 
 Tile* UserMap::tileAt(int x, int y)
 {
     return tileAt(x + (y * m_size.width()) );
+}
+
+void UserMap::highlightPath(QPoint goal, bool hide)
+{
+    Tile* backTrackStart = tileAt(goal.x() + goal.y()*m_size.height());
+    if (backTrackStart->getPrevious() == nullptr) { //if path exists it is known, otherwise we know there is no path
+        std::cout << "fail" << std::endl;
+        return;
+    }
+    while (backTrackStart != (backTrackStart->getPrevious())) {
+        backTrackStart = (backTrackStart->getPrevious());
+
+        backTrackStart->setState(hide ? Tile::States::EMPTY : Tile::States::PATH);
+
+    }
+    std::cout << "Success" << std::endl;
+}
+
+void UserMap::unsetGoal(QPoint old_goal)
+{
+    // highlightPath(old_goal, true);
+    // m_goal =
 }
 
 void UserMap::connectMap() {
@@ -132,6 +163,19 @@ void UserMap::connectMap() {
             }
         }
     }
+}
+
+void UserMap::setGoal(QPoint goal)
+{
+    if(m_tiles.at(goal.x() + m_size.width()*goal.y()).get()->isWall()) return;
+    highlightPath(m_goal, true);
+    highlightPath(goal, false);
+    m_goal = goal;
+}
+
+QPoint UserMap::getGoal()
+{
+    return m_goal;
 }
 
 

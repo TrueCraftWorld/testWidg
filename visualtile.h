@@ -18,7 +18,12 @@ public:
     void setColor(const QColor& );
     void setCoords(int n_x, int n_y);
 
+signals:
+    void mouseEntered(QPoint);
+    void mouseLeaved(QPoint);
+
 protected:
+    bool event(QEvent *ev) override;
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 

@@ -10,14 +10,13 @@ class PathSearch : public QObject
 public:
     explicit PathSearch(QObject * parent = nullptr);
     // PathSearch(UserMap *, QObject * parent = nullptr);
-    bool breadthFirstSearch(QPoint start, QPoint goal = QPoint(0,0));
+    bool breadthFirstSearch(QPoint start);
     bool bFS();
-    static void highlightPath(UserMap* ,QPoint, bool);
+
 
     void setGraph(UserMap* );
     void setStart(QPoint);
-    void setGoal(QPoint);
-    QPoint getGoal();
+
     UserMap * getGraph(void);
 signals:
     void pathFound(bool);
@@ -25,7 +24,6 @@ signals:
 private:
     UserMap * m_graph = nullptr;
     QPoint m_start;
-    QPoint m_goal;
 };
 
 // class TrackTile : public Tile
