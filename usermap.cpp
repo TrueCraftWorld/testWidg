@@ -86,24 +86,26 @@ void UserMap::create()
     connectMap();
 }
 
-void UserMap::resetStart(QPoint point)
+void UserMap::search(QPoint point)
 {
-    highlightPath(point, true);
-    clearPath();
-
+    m_start = point;
     PathSearch* pS = new PathSearch();
     pS->setGraph(this);
     pS->setStart(point);
 
-
     QThread * thread = new QThread();
     pS->moveToThread(thread);
     QObject::connect(thread, &QThread::started, pS, &PathSearch::bFS);
-//    QObject::connect(thread, &QThread::started, &w, &MainWindow::setSearch);
     QObject::connect(thread, &QThread::finished, pS, &QObject::deleteLater);
-//    QObject::connect(thread, &QThread::finished, &w, &MainWindow::unsetSearch);
     QObject::connect(pS, &PathSearch::pathFound, thread, &QThread::quit);
     thread->start();
+}
+
+void UserMap::resetStart(QPoint point)
+{
+    highlightPath(point, true);
+    clearPath();
+    search(point);
 }
 
 void UserMap::clearPath()

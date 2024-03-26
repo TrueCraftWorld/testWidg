@@ -27,7 +27,6 @@ public:
     }; Q_ENUM(States)
     explicit Tile(QObject *_parent = nullptr) {}
     // Tile(int x, int y, bool wall =false);
-
     QPoint getCoords();
     void setCoords(const QPoint&);
 
@@ -69,7 +68,7 @@ public:
 
     void setSize(QSize size);
     void create();
-
+    void search(QPoint);
     void resetStart(QPoint);
     int getWidth();
     int getHeight();
@@ -85,6 +84,7 @@ private:
     QVector<QSharedPointer<Tile>> m_tiles;
     QSize m_size;
     QPoint m_goal;
+    QPoint m_start;
     void connectMap();
     void clearPath();
 };

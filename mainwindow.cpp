@@ -23,14 +23,15 @@ MainWindow::MainWindow(QWidget *parent)
     QHBoxLayout *layout = new QHBoxLayout;
 
     searchButton = new QPushButton;
-    searchButton->setText(tr("Find Path"));
+    searchButton->setText(tr("Generate"));
     searchButton->setCheckable(true);
     searchButton->setChecked(true);
 
+
+    layout->addWidget(v_map);
     layout->addStretch();
     layout->addWidget(searchButton);
     layout->addStretch();
-    layout->addWidget(v_map);
     setLayout(layout);
     setWindowTitle(tr("Path Test"));
 }
@@ -39,8 +40,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::generateMap()
 {
-    unsigned width = 160;
-    unsigned height = 90;
+    unsigned width = 80;
+    unsigned height = 80;
 
     m_map = new UserMap(this);
     m_map->setSize(QSize(width, height));
