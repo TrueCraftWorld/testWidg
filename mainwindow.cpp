@@ -28,8 +28,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::generateMap()
 {
-    unsigned width = 100;
-    unsigned height = 100;
+    unsigned width = 160;
+    unsigned height = 90;
 
     m_map = new UserMap(this);
     m_map->setSize(QSize(width, height));
