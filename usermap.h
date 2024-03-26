@@ -79,6 +79,10 @@ public:
     void setGoal(QPoint);
     void unsetGoal(QPoint);
     QPoint getGoal();
+    void empty();
+
+signals:
+    void emptied();
 
 private:
     QVector<QSharedPointer<Tile>> m_tiles;

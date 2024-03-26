@@ -9,6 +9,7 @@ QT_BEGIN_NAMESPACE
 class QGraphicsScene;
 class QSplitter;
 class QPushButton;
+class QLineEdit;
 QT_END_NAMESPACE
 
 class MainWindow : public QWidget
@@ -24,9 +25,12 @@ public:
 private:
     bool isSearch;
     void setupMatrix();
-    void generateMap();
+    void generateMap(int, int);
+    void reGenerateMap(int, int);
     void destroyMap();
 
+    QLineEdit *widthEdit;
+    QLineEdit *heightEdit;
     QPushButton *searchButton;
     QGraphicsScene *scene;
     UserMap* m_map;

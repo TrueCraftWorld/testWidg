@@ -1,8 +1,7 @@
 #include "pathfinding.h"
 
 #include "usermap.h"
-#include <cstdlib>
-#include <ctime>
+#include <QRandomGenerator>
 #include <memory>
 #include <QPoint>
 #include <QSize>
@@ -62,25 +61,21 @@ void UserMap::setSize(QSize size)
 void UserMap::create()
 {
     if (!m_size.isValid()) return;
-    // m_tiles.resize(m_size.width()*m_size.height());
-    std::srand(std::time(0));
 
-    bool wall = false;
-    for (int i = 0; i < m_size.height(); ++i) {
-        for (int j = 0; j < m_size.width(); ++j) {
-            if (std::rand() > RAND_MAX/3){
+    int wall = false;
+    for (int  row = 0; row < m_size.height(); ++row) {
+        for (int column = 0; column < m_size.width(); ++column) {
+            if (QRandomGenerator::global()->bounded(100) > 25){
                 wall = false;
             } else {
                 wall = true;
             }
-            if (i == 0 && j == 0)  wall = false;
+            if (row == 0 && column == 0)  wall = false;
             QSharedPointer<Tile> tile_ptr (new Tile());
 
-            tile_ptr->setCoords(QPoint(j,i));
+            tile_ptr->setCoords(QPoint(column,row));
             tile_ptr->setWall(wall);
-
             m_tiles.push_back(tile_ptr);
-
         }
     }
     connectMap();
@@ -148,9 +143,7 @@ void UserMap::highlightPath(QPoint goal, bool hide)
     }
     while (backTrackStart != (backTrackStart->getPrevious())) {
         backTrackStart = (backTrackStart->getPrevious());
-
         backTrackStart->setState(hide ? Tile::States::EMPTY : Tile::States::PATH);
-
     }
     std::cout << "Success" << std::endl;
 }
@@ -163,34 +156,30 @@ void UserMap::unsetGoal(QPoint old_goal)
 
 void UserMap::connectMap() {
 
-    for (int j = 0; j < m_size.height(); ++j) {
-        for (int i = 0; i < m_size.width(); ++i) {
-            // m_tiles.at(i + m_size.width()*j)->neighbors.push_back(nullptr);
-            // m_tiles.at(i + m_size.width()*j)->neighbors.push_back(nullptr);
-            // m_tiles.at(i + m_size.width()*j)->neighbors.push_back(nullptr);
-            // m_tiles.at(i + m_size.width()*j)->neighbors.push_back(nullptr);
+    for (int row = 0; row < m_size.height(); ++row) {
+        for (int column = 0; column < m_size.width(); ++column) {
 
-            Tile* tmp = m_tiles.at(i + m_size.width()*j).get();
+            Tile* tmp = m_tiles.at(column + m_size.width()*row).get();
             Tile* mbNeighbor = nullptr;
-            if (i > 0) {
-                mbNeighbor = m_tiles.at(i + m_size.width()*j - 1).get();
+            if (column > 0) {
+                mbNeighbor = m_tiles.at(column + m_size.width()*row - 1).get();
                 if (!mbNeighbor->isWall())
                     tmp->neighbors.at(LEFT) = mbNeighbor;
             }
 
-            if (i < (m_size.width() - 1)) {
-                mbNeighbor = m_tiles.at(i + m_size.width()*j + 1).get();
+            if (column < (m_size.width() - 1)) {
+                mbNeighbor = m_tiles.at(column + m_size.width()*row + 1).get();
                 if (!mbNeighbor->isWall())
                     tmp->neighbors.at(RIGHT) = mbNeighbor;
             }
 
-            if (j > 0) {
-                mbNeighbor = m_tiles.at(i + m_size.width()*(j - 1)).get();
+            if (row > 0) {
+                mbNeighbor = m_tiles.at(column + m_size.width()*(row - 1)).get();
                 if (!mbNeighbor->isWall())
                     tmp->neighbors.at(UP) = mbNeighbor;
             }
-            if (j < (m_size.height() - 1)) {
-                mbNeighbor = m_tiles.at(i + m_size.width()*(j + 1)).get();
+            if (row < (m_size.height() - 1)) {
+                mbNeighbor = m_tiles.at(column + m_size.width()*(row + 1)).get();
                 if (!mbNeighbor->isWall())
                     tmp->neighbors.at(DOWN) = mbNeighbor;
             }
@@ -209,6 +198,15 @@ void UserMap::setGoal(QPoint goal)
 QPoint UserMap::getGoal()
 {
     return m_goal;
+}
+
+void UserMap::empty()
+{
+    m_tiles.clear();
+    m_start = QPoint(0,0);
+    m_goal = QPoint(0,0);
+    m_size = QSize(0,0);
+    emit emptied();
 }
 
 
