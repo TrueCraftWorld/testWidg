@@ -8,6 +8,7 @@
 QT_BEGIN_NAMESPACE
 class QGraphicsScene;
 class QSplitter;
+class QPushButton;
 QT_END_NAMESPACE
 
 class MainWindow : public QWidget
@@ -26,6 +27,7 @@ private:
     void generateMap();
     void destroyMap();
 
+    QPushButton *searchButton;
     QGraphicsScene *scene;
     UserMap* m_map;
 };

@@ -93,7 +93,7 @@ bool VisualTile::event(QEvent *event)
 
 void VisualTile::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-
+    emit mouseReleased(QPoint(x,y));
     QGraphicsItem::mousePressEvent(event);
 
     update();
@@ -102,7 +102,7 @@ void VisualTile::mousePressEvent(QGraphicsSceneMouseEvent *event)
 void VisualTile::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     // emit mouseLeaved(QPoint(x,y));
-    emit mouseEntered(QPoint(x,y));
+
     QGraphicsItem::mouseReleaseEvent(event);
     update();
 }

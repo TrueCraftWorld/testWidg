@@ -37,6 +37,7 @@ public:
     void setState(States);
 
     std::array<Tile*, 4> neighbors = {nullptr,nullptr,nullptr,nullptr};
+
     // std::array<Tile*, 8> neighbors;
 signals:
     void stateChanged();
@@ -69,6 +70,7 @@ public:
     void setSize(QSize size);
     void create();
 
+    void resetStart(QPoint);
     int getWidth();
     int getHeight();
     void addTile(QSharedPointer<Tile>);
@@ -84,6 +86,7 @@ private:
     QSize m_size;
     QPoint m_goal;
     void connectMap();
+    void clearPath();
 };
 
 

@@ -1,3 +1,5 @@
+#include "pathfinding.h"
+
 #include "usermap.h"
 #include <cstdlib>
 #include <ctime>
@@ -5,6 +7,7 @@
 #include <QPoint>
 #include <QSize>
 #include <QSharedPointer>
+#include <QThread>
 
 QPoint Tile::getCoords()
 {
@@ -37,6 +40,8 @@ void Tile::setState(Tile::States state)
     m_state = state;
     emit stateChanged();
 }
+
+
 
 Tile* Tile::getPrevious()
 {
@@ -79,6 +84,36 @@ void UserMap::create()
         }
     }
     connectMap();
+}
+
+void UserMap::resetStart(QPoint point)
+{
+    highlightPath(point, true);
+    clearPath();
+
+    PathSearch* pS = new PathSearch();
+    pS->setGraph(this);
+    pS->setStart(point);
+
+
+    QThread * thread = new QThread();
+    pS->moveToThread(thread);
+    QObject::connect(thread, &QThread::started, pS, &PathSearch::bFS);
+//    QObject::connect(thread, &QThread::started, &w, &MainWindow::setSearch);
+    QObject::connect(thread, &QThread::finished, pS, &QObject::deleteLater);
+//    QObject::connect(thread, &QThread::finished, &w, &MainWindow::unsetSearch);
+    QObject::connect(pS, &PathSearch::pathFound, thread, &QThread::quit);
+    thread->start();
+}
+
+void UserMap::clearPath()
+{
+    for (auto tmp : m_tiles)
+    {
+        tmp.get()->setPrevious(nullptr);
+        if (tmp.get()->getState() != Tile::States::WALL)
+            tmp.get()->setState(Tile::States::EMPTY);
+    }
 }
 
 int UserMap::getWidth()

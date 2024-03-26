@@ -9,6 +9,7 @@
 #include <QSplitter>
 #include <QSize>
 #include <QGraphicsObject>
+#include <QPushButton>
 
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent), scene(new QGraphicsScene(this))
@@ -20,6 +21,15 @@ MainWindow::MainWindow(QWidget *parent)
     v_map->tileMap()->setScene(scene);
 
     QHBoxLayout *layout = new QHBoxLayout;
+
+    searchButton = new QPushButton;
+    searchButton->setText(tr("Find Path"));
+    searchButton->setCheckable(true);
+    searchButton->setChecked(true);
+
+    layout->addStretch();
+    layout->addWidget(searchButton);
+    layout->addStretch();
     layout->addWidget(v_map);
     setLayout(layout);
     setWindowTitle(tr("Path Test"));
@@ -53,6 +63,7 @@ void MainWindow::generateMap()
             });
             QObject::connect(item, &VisualTile::mouseEntered, m_map, &UserMap::setGoal);
             QObject::connect(item, &VisualTile::mouseLeaved, m_map, &UserMap::unsetGoal);
+            QObject::connect(item, &VisualTile::mouseReleased, m_map, &UserMap::resetStart);
             scene->addItem(static_cast<QGraphicsObject *>(item));
         }
     }

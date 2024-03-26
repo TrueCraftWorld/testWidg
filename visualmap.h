@@ -51,9 +51,9 @@ signals:
 
 private:
     GraphicsView *graphicsView;
-    QPushButton *findPathButton;
 
-    qint32 zoomLevel = 250;
+
+    qint32 zoomLevel = 120;
 };
 
 #endif // VISUALMAP_H

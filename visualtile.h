@@ -21,6 +21,7 @@ public:
 signals:
     void mouseEntered(QPoint);
     void mouseLeaved(QPoint);
+    void mouseReleased(QPoint);
 
 protected:
     bool event(QEvent *ev) override;
