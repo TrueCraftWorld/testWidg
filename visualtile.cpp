@@ -79,14 +79,6 @@ void VisualTile::setCoords(int n_x, int n_y)
 
 bool VisualTile::event(QEvent *event)
 {
-    if (event->type() == QEvent::HoverEnter)
-    {
-        emit mouseEntered(QPoint(x,y));
-    }
-    if (event->type() == QEvent::HoverLeave)
-    {
-        emit mouseLeaved(QPoint(x,y));
-    }
     if (event->type() == QEvent::GraphicsSceneHoverEnter)
     {
         emit mouseEntered(QPoint(x,y));
@@ -99,16 +91,9 @@ bool VisualTile::event(QEvent *event)
     // update();
 }
 
-// void VisualTile::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-// {
-
-//     QGraphicsItem::mouseMoveEvent(event);
-//     update();
-// }
-
 void VisualTile::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-
+    emit mouseReleased(QPoint(x,y));
     QGraphicsItem::mousePressEvent(event);
 
     update();
@@ -117,7 +102,7 @@ void VisualTile::mousePressEvent(QGraphicsSceneMouseEvent *event)
 void VisualTile::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     // emit mouseLeaved(QPoint(x,y));
-    emit mouseEntered(QPoint(x,y));
+
     QGraphicsItem::mouseReleaseEvent(event);
     update();
 }

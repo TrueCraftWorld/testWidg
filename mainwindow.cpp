@@ -8,6 +8,8 @@
 #include <QHBoxLayout>
 #include <QSplitter>
 #include <QSize>
+#include <QGraphicsObject>
+#include <QPushButton>
 
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent), scene(new QGraphicsScene(this))
@@ -19,7 +21,17 @@ MainWindow::MainWindow(QWidget *parent)
     v_map->tileMap()->setScene(scene);
 
     QHBoxLayout *layout = new QHBoxLayout;
+
+    searchButton = new QPushButton;
+    searchButton->setText(tr("Generate"));
+    searchButton->setCheckable(true);
+    searchButton->setChecked(true);
+
+
     layout->addWidget(v_map);
+    layout->addStretch();
+    layout->addWidget(searchButton);
+    layout->addStretch();
     setLayout(layout);
     setWindowTitle(tr("Path Test"));
 }
@@ -28,8 +40,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::generateMap()
 {
-    unsigned width = 100;
-    unsigned height = 100;
+    unsigned width = 80;
+    unsigned height = 80;
 
     m_map = new UserMap(this);
     m_map->setSize(QSize(width, height));
@@ -52,6 +64,7 @@ void MainWindow::generateMap()
             });
             QObject::connect(item, &VisualTile::mouseEntered, m_map, &UserMap::setGoal);
             QObject::connect(item, &VisualTile::mouseLeaved, m_map, &UserMap::unsetGoal);
+            QObject::connect(item, &VisualTile::mouseReleased, m_map, &UserMap::resetStart);
             scene->addItem(static_cast<QGraphicsObject *>(item));
         }
     }

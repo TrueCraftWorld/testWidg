@@ -26,19 +26,10 @@ VisualMap::VisualMap(const QString &name, QWidget *parent)
 
 
     // Label layout
-    QHBoxLayout *labelLayout = new QHBoxLayout;
 
-    findPathButton = new QPushButton;
-    findPathButton->setText(tr("Find Path"));
-    findPathButton->setCheckable(true);
-    findPathButton->setChecked(true);
-
-    labelLayout->addStretch();
-    labelLayout->addWidget(findPathButton);
-    labelLayout->addStretch();
 
     QGridLayout *topLayout = new QGridLayout;
-    topLayout->addLayout(labelLayout, 0, 0);
+
     topLayout->addWidget(graphicsView, 1, 0);
     setLayout(topLayout);
 

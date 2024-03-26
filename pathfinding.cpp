@@ -17,30 +17,10 @@ void PathSearch::setGraph(UserMap * graph)
     m_graph = graph;
 }
 
-// void PathSearch::highlightPath(UserMap* graph, QPoint goal, bool hide)
-// {
-//     Tile* backTrackStart = graph->tileAt(goal.x() + goal.y()*graph->getWidth());
-
-//     while (backTrackStart != (backTrackStart->getPrevious())) {
-//             // std::cout << "N=" << curNumber << "<--";
-//         backTrackStart = (backTrackStart->getPrevious());
-//         if (backTrackStart == nullptr) {
-//             std::cout << "fail" << std::endl;
-//             return;
-//         }
-//         backTrackStart->setState(hide ? Tile::States::EMPTY : Tile::States::PATH);
-//     }
-//     std::cout << "Success" << std::endl;
-// }
-
-
-
 void PathSearch::setStart(QPoint start)
 {
      m_start = start;
 }
-
-
 
 bool PathSearch::breadthFirstSearch(QPoint start)
 {

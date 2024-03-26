@@ -1,3 +1,5 @@
+#include "pathfinding.h"
+
 #include "usermap.h"
 #include <cstdlib>
 #include <ctime>
@@ -5,10 +7,7 @@
 #include <QPoint>
 #include <QSize>
 #include <QSharedPointer>
-
-// Tile::Tile(int x, int y, bool wall)
-//     : m_coords{x, y}, m_wall{wall}
-// {}
+#include <QThread>
 
 QPoint Tile::getCoords()
 {
@@ -42,6 +41,8 @@ void Tile::setState(Tile::States state)
     emit stateChanged();
 }
 
+
+
 Tile* Tile::getPrevious()
 {
     return m_previous;
@@ -67,7 +68,7 @@ void UserMap::create()
     bool wall = false;
     for (int i = 0; i < m_size.height(); ++i) {
         for (int j = 0; j < m_size.width(); ++j) {
-            if (std::rand() > RAND_MAX/4){
+            if (std::rand() > RAND_MAX/3){
                 wall = false;
             } else {
                 wall = true;
@@ -83,6 +84,38 @@ void UserMap::create()
         }
     }
     connectMap();
+}
+
+void UserMap::search(QPoint point)
+{
+    m_start = point;
+    PathSearch* pS = new PathSearch();
+    pS->setGraph(this);
+    pS->setStart(point);
+
+    QThread * thread = new QThread();
+    pS->moveToThread(thread);
+    QObject::connect(thread, &QThread::started, pS, &PathSearch::bFS);
+    QObject::connect(thread, &QThread::finished, pS, &QObject::deleteLater);
+    QObject::connect(pS, &PathSearch::pathFound, thread, &QThread::quit);
+    thread->start();
+}
+
+void UserMap::resetStart(QPoint point)
+{
+    highlightPath(point, true);
+    clearPath();
+    search(point);
+}
+
+void UserMap::clearPath()
+{
+    for (auto tmp : m_tiles)
+    {
+        tmp.get()->setPrevious(nullptr);
+        if (tmp.get()->getState() != Tile::States::WALL)
+            tmp.get()->setState(Tile::States::EMPTY);
+    }
 }
 
 int UserMap::getWidth()
@@ -108,7 +141,7 @@ Tile* UserMap::tileAt(int x, int y)
 
 void UserMap::highlightPath(QPoint goal, bool hide)
 {
-    Tile* backTrackStart = tileAt(goal.x() + goal.y()*m_size.height());
+    Tile* backTrackStart = tileAt(goal.x() + goal.y()*m_size.width());
     if (backTrackStart->getPrevious() == nullptr) { //if path exists it is known, otherwise we know there is no path
         std::cout << "fail" << std::endl;
         return;

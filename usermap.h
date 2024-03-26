@@ -27,7 +27,6 @@ public:
     }; Q_ENUM(States)
     explicit Tile(QObject *_parent = nullptr) {}
     // Tile(int x, int y, bool wall =false);
-
     QPoint getCoords();
     void setCoords(const QPoint&);
 
@@ -37,6 +36,7 @@ public:
     void setState(States);
 
     std::array<Tile*, 4> neighbors = {nullptr,nullptr,nullptr,nullptr};
+
     // std::array<Tile*, 8> neighbors;
 signals:
     void stateChanged();
@@ -68,7 +68,8 @@ public:
 
     void setSize(QSize size);
     void create();
-
+    void search(QPoint);
+    void resetStart(QPoint);
     int getWidth();
     int getHeight();
     void addTile(QSharedPointer<Tile>);
@@ -83,7 +84,9 @@ private:
     QVector<QSharedPointer<Tile>> m_tiles;
     QSize m_size;
     QPoint m_goal;
+    QPoint m_start;
     void connectMap();
+    void clearPath();
 };
 
 
