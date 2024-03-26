@@ -47,7 +47,7 @@ private slots:
     void setupMatrix();
 
 signals:
-    zoomed();
+    void zoomed();
 
 private:
     GraphicsView *graphicsView;

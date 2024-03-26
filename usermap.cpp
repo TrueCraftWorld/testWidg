@@ -6,10 +6,6 @@
 #include <QSize>
 #include <QSharedPointer>
 
-// Tile::Tile(int x, int y, bool wall)
-//     : m_coords{x, y}, m_wall{wall}
-// {}
-
 QPoint Tile::getCoords()
 {
     return m_coords;
@@ -67,7 +63,7 @@ void UserMap::create()
     bool wall = false;
     for (int i = 0; i < m_size.height(); ++i) {
         for (int j = 0; j < m_size.width(); ++j) {
-            if (std::rand() > RAND_MAX/4){
+            if (std::rand() > RAND_MAX/3){
                 wall = false;
             } else {
                 wall = true;
@@ -108,7 +104,7 @@ Tile* UserMap::tileAt(int x, int y)
 
 void UserMap::highlightPath(QPoint goal, bool hide)
 {
-    Tile* backTrackStart = tileAt(goal.x() + goal.y()*m_size.height());
+    Tile* backTrackStart = tileAt(goal.x() + goal.y()*m_size.width());
     if (backTrackStart->getPrevious() == nullptr) { //if path exists it is known, otherwise we know there is no path
         std::cout << "fail" << std::endl;
         return;

@@ -8,6 +8,7 @@
 #include <QHBoxLayout>
 #include <QSplitter>
 #include <QSize>
+#include <QGraphicsObject>
 
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent), scene(new QGraphicsScene(this))
