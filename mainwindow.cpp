@@ -18,10 +18,15 @@ MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent), scene(new QGraphicsScene(this))
 
 {
-    generateMap(80,80);
+    // generateMap(80,80);
+    // m_map = new UserMap(this);
+    m_map = new UserMap();
 
     VisualMap *v_map = new VisualMap("Please work");
     v_map->tileMap()->setScene(scene);
+    v_map->tileMap()->setBaseSize(QSize(600,600));
+    v_map->tileMap()->setMinimumHeight(600);
+    v_map->tileMap()->setMinimumWidth(600);
 
     QHBoxLayout *layout = new QHBoxLayout;
     QVBoxLayout *layoutV = new QVBoxLayout;
@@ -67,7 +72,9 @@ MainWindow::MainWindow(QWidget *parent)
                      this, [=]() {
 
         reGenerateMap(widthEdit->displayText().toInt(), heightEdit->displayText().toInt());
-        // scene->
+        // v_map->tileMap()->resetTransform();
+        v_map->tileMap()->scene()->setSceneRect(v_map->tileMap()->scene()->itemsBoundingRect());
+        v_map->tileMap()->scene()->update();
         v_map->updateGeometry();
     });
 }
@@ -76,46 +83,18 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::generateMap(int width, int height)
 {
-    // unsigned width = 80;
-    // unsigned height = 80;
-    for (auto item : scene->items()) {
-        scene->removeItem(item);
-    }
-    m_map = new UserMap(this);
-    m_map->setSize(QSize(width, height));
-    m_map->create();
-    // setMouseTracking(true);
-    bool tmp;
 
-    for (int row = 0; row < height; ++row) {
-        for (int column = 0; column < width; ++column) {
-            tmp = m_map->tileAt(column + width*row)->isWall();
-            QColor color = tmp ? Qt::black : Qt::gray;
-            VisualTile *item = new VisualTile();
-            item->setColor(color);
-            item->setCoords(column, row);
-            item->setPos(QPointF((column+1)*50, (row+1)*50));
 
-            QObject::connect(m_map->tileAt(column,row), &Tile::stateChanged, item, [=](){
-                item->setColor(m_map->tileAt(column,row)->getState() == Tile::States::PATH ? Qt::green : Qt::gray);
-                item->update();
-            });
-            QObject::connect(item, &VisualTile::mouseEntered, m_map, &UserMap::setGoal);
-            QObject::connect(item, &VisualTile::mouseLeaved, m_map, &UserMap::unsetGoal);
-            QObject::connect(item, &VisualTile::mouseReleased, m_map, &UserMap::resetStart);
-            scene->addItem(static_cast<QGraphicsObject *>(item));
-        }
-    }
+    // reGenerateMap(width, height);
 }
 
 void MainWindow::reGenerateMap(int width, int height)
 {
-    for (auto item : scene->items()) {
-        scene->removeItem(item);
-    }
+
+    scene->clear();
+
     m_map->setSize(QSize(width, height));
     m_map->create();
-    // setMouseTracking(true);
     bool tmp;
 
     for (int row = 0; row < height; ++row) {
@@ -128,7 +107,27 @@ void MainWindow::reGenerateMap(int width, int height)
             item->setPos(QPointF((column+1)*50, (row+1)*50));
 
             QObject::connect(m_map->tileAt(column,row), &Tile::stateChanged, item, [=](){
-                item->setColor(m_map->tileAt(column,row)->getState() == Tile::States::PATH ? Qt::green : Qt::gray);
+                QColor color;
+                switch (m_map->tileAt(column,row)->getState()) {
+                case Tile::States::PATH:
+                    color = Qt::green;
+                    break;
+                case Tile::States::EMPTY:
+                    color = Qt::gray;
+                    break;
+                case Tile::States::WALL:
+                    color = Qt::black;
+                    break;
+                case Tile::States::START:
+                    color = Qt::blue;
+                    break;
+                case Tile::States::STOP:
+                    color = Qt::red;
+                    break;
+                default:
+                    break;
+                }
+                item->setColor(color);
                 item->update();
             });
             QObject::connect(item, &VisualTile::mouseEntered, m_map, &UserMap::setGoal);

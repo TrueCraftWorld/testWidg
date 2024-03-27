@@ -93,7 +93,9 @@ bool VisualTile::event(QEvent *event)
 
 void VisualTile::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    emit mouseReleased(QPoint(x,y));
+    // if (color != Qt::black) {
+        emit mouseReleased(QPoint(x,y));
+    // }
     QGraphicsItem::mousePressEvent(event);
 
     update();

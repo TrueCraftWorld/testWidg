@@ -62,7 +62,7 @@ class UserMap : public QObject
 {
     Q_OBJECT
 public:
-    explicit UserMap(QObject *_parent = nullptr) {}
+    // explicit UserMap(QObject *_parent = nullptr) {}
     // UserMap(QWidget *parent = nullptr, int width=10, int height=10, QPoint goal = QPoint(0,0));
     // ~UserMap();
 

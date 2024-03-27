@@ -98,6 +98,7 @@ void UserMap::search(QPoint point)
 
 void UserMap::resetStart(QPoint point)
 {
+    if (tileAt(point.x(), point.y())->isWall()) return;
     highlightPath(point, true);
     clearPath();
     search(point);
@@ -141,17 +142,20 @@ void UserMap::highlightPath(QPoint goal, bool hide)
         std::cout << "fail" << std::endl;
         return;
     }
+    backTrackStart = (backTrackStart->getPrevious());
     while (backTrackStart != (backTrackStart->getPrevious())) {
-        backTrackStart = (backTrackStart->getPrevious());
         backTrackStart->setState(hide ? Tile::States::EMPTY : Tile::States::PATH);
+        backTrackStart = (backTrackStart->getPrevious());
     }
+    backTrackStart->setState(hide ? Tile::States::EMPTY : Tile::States::START);
     std::cout << "Success" << std::endl;
 }
 
 void UserMap::unsetGoal(QPoint old_goal)
 {
+    // if (tileAt(old_goal.x(),old_goal.y())->isWall()) return;
+    // tileAt(old_goal.x(),old_goal.y())->setState(Tile::States::EMPTY);
     // highlightPath(old_goal, true);
-    // m_goal =
 }
 
 void UserMap::connectMap() {
@@ -189,8 +193,13 @@ void UserMap::connectMap() {
 
 void UserMap::setGoal(QPoint goal)
 {
-    if(m_tiles.at(goal.x() + m_size.width()*goal.y()).get()->isWall()) return;
+    if (tileAt(goal.x(),goal.y())->isWall()) return;
+
+    tileAt(m_goal.x(),m_goal.y())->setState(Tile::States::EMPTY);
     highlightPath(m_goal, true);
+
+    tileAt(goal.x(),goal.y())->setState(Tile::States::STOP);
+
     highlightPath(goal, false);
     m_goal = goal;
 }
