@@ -10,7 +10,6 @@
 #include <QSharedPointer>
 #include <iostream>
 
-// enum class States{EMPTY, WALL, START, STOP, PATH};
 
 enum {UP, RIGHT, DOWN, LEFT};
 
@@ -25,8 +24,7 @@ public:
         STOP,
         PATH
     }; Q_ENUM(States)
-    explicit Tile(QObject *_parent = nullptr) {}
-    // Tile(int x, int y, bool wall =false);
+    // explicit Tile(QObject *_parent = nullptr) {}
     QPoint getCoords();
     void setCoords(const QPoint&);
 
@@ -37,7 +35,6 @@ public:
 
     std::array<Tile*, 4> neighbors = {nullptr,nullptr,nullptr,nullptr};
 
-    // std::array<Tile*, 8> neighbors;
 signals:
     void stateChanged();
 
@@ -51,10 +48,6 @@ public:
 private:
     Tile* m_previous = nullptr; //inhereting simple tile to add backtracking
     States m_state;
-    // std::array<MOVE, 4> m_directions = {0,1},{1,0},{0,-1},{-1,0};
-    // std::array<MOVE, 8> Directions = {{0,1},{1,0},{0,-1},{-1,0},
-    //                                   {-1,1},{1,1},{1,-1},{-1,-1}};
-
 };
 
 
@@ -62,10 +55,6 @@ class UserMap : public QObject
 {
     Q_OBJECT
 public:
-    // explicit UserMap(QObject *_parent = nullptr) {}
-    // UserMap(QWidget *parent = nullptr, int width=10, int height=10, QPoint goal = QPoint(0,0));
-    // ~UserMap();
-
     void setSize(QSize size);
     void create();
     void search(QPoint);
@@ -83,6 +72,7 @@ public:
 
 signals:
     void emptied();
+    void mapReady();
 
 private:
     QVector<QSharedPointer<Tile>> m_tiles;
@@ -93,7 +83,19 @@ private:
     void clearPath();
 };
 
-
+class MapGenerator : public QObject
+{
+    Q_OBJECT
+public:
+    void setSize(QSize);
+    void generateMap();
+    QVector<QSharedPointer<Tile>> returnMap();
+private:
+    QSize gen_size;
+    QVector<QSharedPointer<Tile>> gen_tiles;
+signals:
+    void mapCreated();
+};
 
 
 #endif // USERMAP_H

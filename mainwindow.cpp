@@ -12,7 +12,10 @@
 #include <QGraphicsObject>
 #include <QPushButton>
 #include <QLineEdit>
-
+#include <QIntValidator>
+#include <QThread>
+#include <QCoreApplication>
+#include <QEventLoop>
 
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent), scene(new QGraphicsScene(this))
@@ -21,10 +24,11 @@ MainWindow::MainWindow(QWidget *parent)
     // generateMap(80,80);
     // m_map = new UserMap(this);
     m_map = new UserMap();
-
-    VisualMap *v_map = new VisualMap("Please work");
+    m_map->setParent(this);
+    validator = new QIntValidator(1,1000); //2000 -> 10GB RAM used but still works 4 000 000 userTiles and visualTiles is too much
+    v_map = new VisualMap("Please work");
     v_map->tileMap()->setScene(scene);
-    v_map->tileMap()->setBaseSize(QSize(600,600));
+    // v_map->tileMap()->setBaseSize(QSize(600,600));
     v_map->tileMap()->setMinimumHeight(600);
     v_map->tileMap()->setMinimumWidth(600);
 
@@ -34,32 +38,28 @@ MainWindow::MainWindow(QWidget *parent)
     searchButton->setText(tr("Generate"));
     searchButton->setCheckable(true);
     searchButton->setChecked(true);
+    searchButton->setMaximumWidth(150);
 
 
     widthEdit = new QLineEdit;
-    widthEdit->setInputMask(QString("ddddd"));
+    widthEdit->setValidator(validator);
     widthEdit->setPlaceholderText(QString("Width"));
-    widthEdit->setCursorPosition(0);
     widthEdit->setText(QString("80"));
-    widthEdit->clear();
+    widthEdit->setMaximumWidth(150);
 
     heightEdit = new QLineEdit;
-    heightEdit->setInputMask(QString("ddddd"));
+    heightEdit->setValidator(validator);
     heightEdit->setPlaceholderText(QString("Height"));
-    heightEdit->setCursorPosition(0);
     heightEdit->setText(QString("80"));
-    heightEdit->clear();
+    heightEdit->setMaximumWidth(150);
 
-    layoutV->addStretch();
+
     layoutV->addWidget(widthEdit);
-    layoutV->addStretch();
     layoutV->addWidget(heightEdit);
-    layoutV->addStretch();
     layoutV->addWidget(searchButton);
     layoutV->addStretch();
 
     layout->addWidget(v_map);
-    layout->addStretch();
     layout->addLayout(layoutV);
 
     setLayout(layout);
@@ -69,10 +69,9 @@ MainWindow::MainWindow(QWidget *parent)
                      m_map, &UserMap::empty);
 
     QObject::connect(m_map, &UserMap::emptied,
-                     this, [=]() {
+                     this, [this]() {
 
         reGenerateMap(widthEdit->displayText().toInt(), heightEdit->displayText().toInt());
-        // v_map->tileMap()->resetTransform();
         v_map->tileMap()->scene()->setSceneRect(v_map->tileMap()->scene()->itemsBoundingRect());
         v_map->tileMap()->scene()->update();
         v_map->updateGeometry();
@@ -80,24 +79,26 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 
-
-void MainWindow::generateMap(int width, int height)
-{
-
-
-    // reGenerateMap(width, height);
-}
-
 void MainWindow::reGenerateMap(int width, int height)
 {
 
     scene->clear();
-
     m_map->setSize(QSize(width, height));
+
+    QObject::connect(m_map, &UserMap::mapReady, this, &MainWindow::createVisual);
     m_map->create();
+
+
+}
+
+void MainWindow::createVisual()
+{
     bool tmp;
+    int height = m_map->getHeight();
+    int width = m_map->getWidth();
 
     for (int row = 0; row < height; ++row) {
+        if (row % 10 == 0) QCoreApplication::processEvents();
         for (int column = 0; column < width; ++column) {
             tmp = m_map->tileAt(column + width*row)->isWall();
             QColor color = tmp ? Qt::black : Qt::gray;
@@ -143,6 +144,7 @@ UserMap *MainWindow::getMap()
     return m_map;
 }
 
+
 bool MainWindow::isSearchGoing()
 {
     return isSearch;
@@ -157,3 +159,5 @@ void MainWindow::unsetSearch()
 {
     isSearch = false;
 }
+
+

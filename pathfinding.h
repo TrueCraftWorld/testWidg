@@ -9,7 +9,6 @@ class PathSearch : public QObject
     Q_OBJECT
 public:
     explicit PathSearch(QObject * parent = nullptr);
-    // PathSearch(UserMap *, QObject * parent = nullptr);
     bool breadthFirstSearch(QPoint start);
     bool bFS();
 
@@ -26,13 +25,5 @@ private:
     QPoint m_start;
 };
 
-// class TrackTile : public Tile
-// {
-// public:
-//     TrackTile* getPrevious();
-//     setPrevious(TrackTile*);
-// private:
-//     TrackTile* previous = nullptr; //inhereting simple tile to add backtracking
-// };
 
 #endif // PATHFINDING_H

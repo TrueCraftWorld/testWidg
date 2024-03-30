@@ -17,16 +17,10 @@ VisualMap::VisualMap(const QString &name, QWidget *parent)
 {
 
     graphicsView = new GraphicsView(this);
-    // graphicsView->setRenderHint(QPainter::Antialiasing, false);
     graphicsView->setDragMode(QGraphicsView::RubberBandDrag);
     graphicsView->setOptimizationFlags(QGraphicsView::DontSavePainterState);
     graphicsView->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
     graphicsView->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-    // graphicsView->
-
-
-    // Label layout
-
 
     QGridLayout *topLayout = new QGridLayout;
 

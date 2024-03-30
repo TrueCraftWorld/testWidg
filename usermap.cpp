@@ -8,6 +8,8 @@
 #include <QSharedPointer>
 #include <QThread>
 
+
+
 QPoint Tile::getCoords()
 {
     return m_coords;
@@ -62,23 +64,21 @@ void UserMap::create()
 {
     if (!m_size.isValid()) return;
 
-    int wall = false;
-    for (int  row = 0; row < m_size.height(); ++row) {
-        for (int column = 0; column < m_size.width(); ++column) {
-            if (QRandomGenerator::global()->bounded(100) > 25){
-                wall = false;
-            } else {
-                wall = true;
-            }
-            if (row == 0 && column == 0)  wall = false;
-            QSharedPointer<Tile> tile_ptr (new Tile());
+    MapGenerator* mG = new MapGenerator();
+    mG->setSize(m_size);
 
-            tile_ptr->setCoords(QPoint(column,row));
-            tile_ptr->setWall(wall);
-            m_tiles.push_back(tile_ptr);
-        }
-    }
-    connectMap();
+    QThread * thread = new QThread();
+    mG->moveToThread(thread);
+    QObject::connect(thread, &QThread::started, mG, &MapGenerator::generateMap);
+    QObject::connect(thread, &QThread::finished, mG, &QObject::deleteLater);
+    QObject::connect(mG, &MapGenerator::mapCreated, this, [this, mG, thread] {
+        m_tiles = mG->returnMap();
+        thread->quit();
+        connectMap();
+
+        emit mapReady();
+    });
+    thread->start();
 }
 
 void UserMap::search(QPoint point)
@@ -139,7 +139,7 @@ void UserMap::highlightPath(QPoint goal, bool hide)
 {
     Tile* backTrackStart = tileAt(goal.x() + goal.y()*m_size.width());
     if (backTrackStart->getPrevious() == nullptr) { //if path exists it is known, otherwise we know there is no path
-        std::cout << "fail" << std::endl;
+        // std::cout << "fail" << std::endl;
         return;
     }
     backTrackStart = (backTrackStart->getPrevious());
@@ -148,11 +148,12 @@ void UserMap::highlightPath(QPoint goal, bool hide)
         backTrackStart = (backTrackStart->getPrevious());
     }
     backTrackStart->setState(hide ? Tile::States::EMPTY : Tile::States::START);
-    std::cout << "Success" << std::endl;
+    // std::cout << "Success" << std::endl;
 }
 
 void UserMap::unsetGoal(QPoint old_goal)
 {
+    Q_UNUSED(old_goal)
     // if (tileAt(old_goal.x(),old_goal.y())->isWall()) return;
     // tileAt(old_goal.x(),old_goal.y())->setState(Tile::States::EMPTY);
     // highlightPath(old_goal, true);
@@ -219,3 +220,35 @@ void UserMap::empty()
 }
 
 
+
+QVector<QSharedPointer<Tile> > MapGenerator::returnMap()
+{
+    return gen_tiles;
+}
+
+void MapGenerator::setSize(QSize size)
+{
+    if (size.isValid()) gen_size = size;
+}
+
+void MapGenerator::generateMap()
+{
+    // if (size.isValid())
+    int wall = false;
+    for (int  row = 0; row < gen_size.height(); ++row) {
+        for (int column = 0; column < gen_size.width(); ++column) {
+            if (QRandomGenerator::global()->bounded(100) > 25){
+                wall = false;
+            } else {
+                wall = true;
+            }
+            if (row == 0 && column == 0)  wall = false;
+            QSharedPointer<Tile> tile_ptr (new Tile());
+
+            tile_ptr->setCoords(QPoint(column,row));
+            tile_ptr->setWall(wall);
+            gen_tiles.push_back(tile_ptr);
+        }
+    }
+    emit mapCreated();
+}

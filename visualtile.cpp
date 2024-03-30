@@ -6,14 +6,6 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
-// VisualTile::VisualTile(const QColor &n_color, int n_x, int n_y, Tile::States n_state)
-//     : x(n_x), y(n_y), color(n_color), m_state(n_state)
-// {
-//     setZValue((x + y) % 2);
-//     setFlags(ItemIsSelectable);
-//     setAcceptHoverEvents(true);
-// }
-
 
 QRectF VisualTile::boundingRect() const
 {
@@ -82,20 +74,19 @@ bool VisualTile::event(QEvent *event)
     if (event->type() == QEvent::GraphicsSceneHoverEnter)
     {
         emit mouseEntered(QPoint(x,y));
+        event->accept();
     }
     if (event->type() == QEvent::GraphicsSceneHoverLeave)
     {
         emit mouseLeaved(QPoint(x,y));
+        event->accept();
     }
     return QObject::event(event);
-    // update();
 }
 
 void VisualTile::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    // if (color != Qt::black) {
-        emit mouseReleased(QPoint(x,y));
-    // }
+    emit mouseReleased(QPoint(x,y));
     QGraphicsItem::mousePressEvent(event);
 
     update();
@@ -103,8 +94,6 @@ void VisualTile::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void VisualTile::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    // emit mouseLeaved(QPoint(x,y));
-
     QGraphicsItem::mouseReleaseEvent(event);
     update();
 }
