@@ -234,6 +234,7 @@ void MapGenerator::setSize(QSize size)
 void MapGenerator::generateMap()
 {
     // if (size.isValid())
+
     int wall = false;
     for (int  row = 0; row < gen_size.height(); ++row) {
         for (int column = 0; column < gen_size.width(); ++column) {

@@ -6,6 +6,8 @@
 #include <QGraphicsView>
 #include <QObject>
 
+
+
 QT_BEGIN_NAMESPACE
 class QLabel;
 class QSlider;
@@ -15,11 +17,11 @@ class VisualMap;
 
 
 
-class GraphicsView : public QGraphicsView
+class MapView : public QGraphicsView
 {
     Q_OBJECT
 public:
-    GraphicsView(VisualMap *v) : QGraphicsView(), m_map(v) { }
+    MapView(VisualMap *v) : QGraphicsView(), m_map(v) { }
 
 private:
     void wheelEvent(QWheelEvent *) override;
@@ -35,13 +37,14 @@ class VisualMap : public QFrame
 {
     Q_OBJECT
 public:
-    explicit VisualMap(const QString &name, QWidget *parent = nullptr);
+    explicit VisualMap(QWidget *parent = nullptr);
 
     QGraphicsView *tileMap() const;
 
 public slots:
     void zoomInBy(int level);
     void zoomOutBy(int level);
+    void zoomReset();
 
 private slots:
     void setupMatrix();
@@ -50,7 +53,7 @@ signals:
     void zoomed();
 
 private:
-    GraphicsView *graphicsView;
+    MapView *graphicsView;
 
 
     qint32 zoomLevel = 120;

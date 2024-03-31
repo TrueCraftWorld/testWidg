@@ -24,12 +24,13 @@ public:
         STOP,
         PATH
     }; Q_ENUM(States)
-    // explicit Tile(QObject *_parent = nullptr) {}
+
     QPoint getCoords();
     void setCoords(const QPoint&);
 
     void setWall(bool);
     bool isWall();
+
     States getState();
     void setState(States);
 
@@ -49,6 +50,7 @@ private:
     Tile* m_previous = nullptr; //inhereting simple tile to add backtracking
     States m_state;
 };
+
 
 
 class UserMap : public QObject

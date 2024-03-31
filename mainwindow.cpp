@@ -18,6 +18,7 @@
 #include <QEventLoop>
 #include <QSettings>
 
+
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent), scene(new QGraphicsScene(this))
 
@@ -27,10 +28,12 @@ MainWindow::MainWindow(QWidget *parent)
     m_map = new UserMap();
     m_map->setParent(this);
     validator = new QIntValidator(1,1000); //2000 = 10GB RAM used but still works
-    v_map = new VisualMap("Please work");
+    v_map = new VisualMap();
     v_map->tileMap()->setScene(scene);
     v_map->tileMap()->setMinimumHeight(600);
     v_map->tileMap()->setMinimumWidth(600);
+
+
 
     QHBoxLayout *layout = new QHBoxLayout;
     QVBoxLayout *layoutV = new QVBoxLayout;
@@ -41,11 +44,14 @@ MainWindow::MainWindow(QWidget *parent)
     searchButton->setMaximumWidth(150);
 
 
+
     widthEdit = new QLineEdit;
     widthEdit->setValidator(validator);
     widthEdit->setPlaceholderText(QString("Width"));
     widthEdit->setText(QString("80"));
     widthEdit->setMaximumWidth(150);
+
+
 
     heightEdit = new QLineEdit;
     heightEdit->setValidator(validator);
@@ -54,13 +60,18 @@ MainWindow::MainWindow(QWidget *parent)
     heightEdit->setMaximumWidth(150);
 
 
+    layoutV->addSpacing(9);
+
     layoutV->addWidget(widthEdit);
+
     layoutV->addWidget(heightEdit);
     layoutV->addWidget(searchButton);
     layoutV->addStretch();
 
     layout->addWidget(v_map);
     layout->addLayout(layoutV);
+
+    widthEdit->move(widthEdit->x(), v_map->y());
 
     setLayout(layout);
     setWindowTitle(tr("Path Test"));
@@ -71,10 +82,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     QObject::connect(m_map, &UserMap::emptied,
                      this, [this]() {
-
+        v_map->zoomReset();
         reGenerateMap(widthEdit->displayText().toInt(), heightEdit->displayText().toInt());
-        v_map->tileMap()->scene()->setSceneRect(v_map->tileMap()->scene()->itemsBoundingRect());
-        v_map->tileMap()->scene()->update();
+        // v_map->tileMap()->scene()->setSceneRect(v_map->tileMap()->scene()->itemsBoundingRect());
+        // v_map->tileMap()->scene()->update();
         v_map->updateGeometry();
     });
 }
@@ -106,7 +117,7 @@ void MainWindow::createVisual()
             VisualTile *item = new VisualTile();
             item->setColor(color);
             item->setCoords(column, row);
-            item->setPos(QPointF((column+1)*50, (row+1)*50));
+            item->setPos(QPointF((column)*50, (row)*50));
 
             QObject::connect(m_map->tileAt(column,row), &Tile::stateChanged, item, [item, this, column, row](){
                 QColor color;
@@ -138,6 +149,7 @@ void MainWindow::createVisual()
             scene->addItem(static_cast<QGraphicsObject *>(item));
         }
     }
+    v_map->tileMap()->centerOn(QPointF(width*25, height*25));
 }
 
 UserMap *MainWindow::getMap()

@@ -1,9 +1,10 @@
 #include "visualmap.h"
-// #include <QtOpenGL>
 #include <QtMath>
 #include <QtWidgets>
+#include <QBoxLayout>
 
-void GraphicsView::wheelEvent(QWheelEvent *e)
+
+void MapView::wheelEvent(QWheelEvent *e)
 {
         if (e->angleDelta().y() > 0)
             m_map->zoomInBy(6);
@@ -12,20 +13,22 @@ void GraphicsView::wheelEvent(QWheelEvent *e)
         e->accept();
 }
 
-VisualMap::VisualMap(const QString &name, QWidget *parent)
+VisualMap::VisualMap(QWidget *parent)
     : QFrame(parent)
 {
 
-    graphicsView = new GraphicsView(this);
+    graphicsView = new MapView(this);
     graphicsView->setDragMode(QGraphicsView::RubberBandDrag);
-    graphicsView->setOptimizationFlags(QGraphicsView::DontSavePainterState);
+    // graphicsView->setOptimizationFlags(QGraphicsView::DontSavePainterState);
+    graphicsView->setOptimizationFlags(QGraphicsView::DontAdjustForAntialiasing);
     graphicsView->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
     graphicsView->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
 
-    QGridLayout *topLayout = new QGridLayout;
+    QBoxLayout *topLayout = new QBoxLayout(QBoxLayout::LeftToRight);
 
-    topLayout->addWidget(graphicsView, 1, 0);
+    topLayout->addWidget(graphicsView);
     setLayout(topLayout);
+
 
     connect(this, &VisualMap::zoomed, this, &VisualMap::setupMatrix);
 
@@ -44,7 +47,6 @@ void VisualMap::setupMatrix()
     matrix.scale(scale, scale);
     graphicsView->setTransform(matrix);
 }
-
 
 
 void VisualMap::zoomInBy(int level)
@@ -69,4 +71,14 @@ void VisualMap::zoomOutBy(int level)
         zoomLevel = 0;
         emit zoomed();
     }
+}
+
+void VisualMap::zoomReset()
+{
+    graphicsView->resetTransform();
+    // if (zoomLevel != 100) {
+        zoomLevel = 100;
+        emit zoomed();
+    // }
+    update();
 }
