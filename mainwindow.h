@@ -34,6 +34,8 @@ private:
     void destroyMap();
     void createVisual();
 
+    void closeEvent(QCloseEvent *event) override;
+
     VisualMap *v_map;
     QIntValidator *validator;
     QLineEdit *widthEdit;

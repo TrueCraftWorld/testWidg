@@ -16,19 +16,19 @@
 #include <QThread>
 #include <QCoreApplication>
 #include <QEventLoop>
+#include <QSettings>
 
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent), scene(new QGraphicsScene(this))
 
 {
-    // generateMap(80,80);
-    // m_map = new UserMap(this);
+    QSettings settings("CraftWorld", "pathSearch");
+
     m_map = new UserMap();
     m_map->setParent(this);
-    validator = new QIntValidator(1,1000); //2000 -> 10GB RAM used but still works 4 000 000 userTiles and visualTiles is too much
+    validator = new QIntValidator(1,1000); //2000 = 10GB RAM used but still works
     v_map = new VisualMap("Please work");
     v_map->tileMap()->setScene(scene);
-    // v_map->tileMap()->setBaseSize(QSize(600,600));
     v_map->tileMap()->setMinimumHeight(600);
     v_map->tileMap()->setMinimumWidth(600);
 
@@ -64,6 +64,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     setLayout(layout);
     setWindowTitle(tr("Path Test"));
+    this->restoreGeometry(settings.value("geometry").toByteArray());
 
     QObject::connect(searchButton, &QPushButton::clicked,
                      m_map, &UserMap::empty);
@@ -98,18 +99,18 @@ void MainWindow::createVisual()
     int width = m_map->getWidth();
 
     for (int row = 0; row < height; ++row) {
-        if (row % 10 == 0) QCoreApplication::processEvents();
+        if (row % 20 == 0) QCoreApplication::processEvents();
         for (int column = 0; column < width; ++column) {
-            tmp = m_map->tileAt(column + width*row)->isWall();
+            tmp = m_map->tileAt(column,row)->isWall();
             QColor color = tmp ? Qt::black : Qt::gray;
             VisualTile *item = new VisualTile();
             item->setColor(color);
             item->setCoords(column, row);
             item->setPos(QPointF((column+1)*50, (row+1)*50));
 
-            QObject::connect(m_map->tileAt(column,row), &Tile::stateChanged, item, [=](){
+            QObject::connect(m_map->tileAt(column,row), &Tile::stateChanged, item, [item, this, column, row](){
                 QColor color;
-                switch (m_map->tileAt(column,row)->getState()) {
+                switch (this->m_map->tileAt(column,row)->getState()) {
                 case Tile::States::PATH:
                     color = Qt::green;
                     break;
@@ -160,4 +161,10 @@ void MainWindow::unsetSearch()
     isSearch = false;
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    QSettings settings("CraftWorld", "pathSearch");
+    settings.setValue("geometry", saveGeometry());
+    QWidget::closeEvent(event);
+}
 
