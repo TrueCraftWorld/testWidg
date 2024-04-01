@@ -22,12 +22,11 @@ public:
     MainWindow(QWidget *parent = nullptr);
 
     UserMap* getMap();
-    bool isSearchGoing();
-    void setSearch();
-    void unsetSearch();
+    bool isMapRegenON(bool);
+    void setMapRegen();
 
 private:
-    bool isSearch;
+    bool isMapRegen;
     void setupMatrix();
     void generateMap(int, int);
     void reGenerateMap(int, int);
@@ -36,7 +35,7 @@ private:
 
     void closeEvent(QCloseEvent *event) override;
 
-    VisualMap *v_map;
+    MapView *v_map;
     QIntValidator *validator;
     QLineEdit *widthEdit;
     QLineEdit *heightEdit;

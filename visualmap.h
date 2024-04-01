@@ -13,49 +13,24 @@ class QLabel;
 class QSlider;
 QT_END_NAMESPACE
 
-class VisualMap;
-
-
 
 class MapView : public QGraphicsView
 {
     Q_OBJECT
 public:
-    MapView(VisualMap *v) : QGraphicsView(), m_map(v) { }
-
-private:
-    void wheelEvent(QWheelEvent *) override;
-
-private:
-    VisualMap *m_map;
-};
-
-
-
-
-class VisualMap : public QFrame
-{
-    Q_OBJECT
-public:
-    explicit VisualMap(QWidget *parent = nullptr);
-
-    QGraphicsView *tileMap() const;
-
-public slots:
+    MapView(QWidget *parent = nullptr);
     void zoomInBy(int level);
     void zoomOutBy(int level);
     void zoomReset();
-
-private slots:
-    void setupMatrix();
+    QGraphicsView *tileMap() const;
 
 signals:
     void zoomed();
 
 private:
-    MapView *graphicsView;
-
-
+    void setupMatrix();
+    void wheelEvent(QWheelEvent *) override;
+    QGraphicsView *me;
     qint32 zoomLevel = 120;
 };
 

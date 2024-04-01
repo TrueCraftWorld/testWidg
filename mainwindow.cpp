@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_map = new UserMap();
     m_map->setParent(this);
     validator = new QIntValidator(1,1000); //2000 = 10GB RAM used but still works
-    v_map = new VisualMap();
+    v_map = new MapView();
     v_map->tileMap()->setScene(scene);
     v_map->tileMap()->setMinimumHeight(600);
     v_map->tileMap()->setMinimumWidth(600);
@@ -99,8 +99,6 @@ void MainWindow::reGenerateMap(int width, int height)
 
     QObject::connect(m_map, &UserMap::mapReady, this, &MainWindow::createVisual);
     m_map->create();
-
-
 }
 
 void MainWindow::createVisual()
@@ -108,10 +106,12 @@ void MainWindow::createVisual()
     bool tmp;
     int height = m_map->getHeight();
     int width = m_map->getWidth();
-
+    int count = 0;
+    setMapRegenON(true);
     for (int row = 0; row < height; ++row) {
-        if (row % 20 == 0) QCoreApplication::processEvents();
+
         for (int column = 0; column < width; ++column) {
+
             tmp = m_map->tileAt(column,row)->isWall();
             QColor color = tmp ? Qt::black : Qt::gray;
             VisualTile *item = new VisualTile();
@@ -147,8 +147,11 @@ void MainWindow::createVisual()
             QObject::connect(item, &VisualTile::mouseLeaved, m_map, &UserMap::unsetGoal);
             QObject::connect(item, &VisualTile::mouseReleased, m_map, &UserMap::resetStart);
             scene->addItem(static_cast<QGraphicsObject *>(item));
+            count++;
+            if (count % 50 == 0) if (row % 20 == 0) QCoreApplication::processEvents();
         }
     }
+    setMapRegenON(false);
     v_map->tileMap()->centerOn(QPointF(width*25, height*25));
 }
 
@@ -158,20 +161,18 @@ UserMap *MainWindow::getMap()
 }
 
 
-bool MainWindow::isSearchGoing()
+bool MainWindow::isMapRegen()
 {
-    return isSearch;
+    return isMapRegen;
 }
 
-void MainWindow::setSearch()
+void MainWindow::setMapRegenON(bool n_isMapRegen)
 {
-    isSearch = true;
+    isMapRegen = n_isMapRegen;
+
 }
 
-void MainWindow::unsetSearch()
-{
-    isSearch = false;
-}
+
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {

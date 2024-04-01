@@ -7,49 +7,41 @@
 void MapView::wheelEvent(QWheelEvent *e)
 {
         if (e->angleDelta().y() > 0)
-            m_map->zoomInBy(6);
+            zoomInBy(6);
         else
-            m_map->zoomOutBy(6);
+            zoomOutBy(6);
         e->accept();
 }
 
-VisualMap::VisualMap(QWidget *parent)
-    : QFrame(parent)
+QGraphicsView *MapView::tileMap() const
 {
-
-    graphicsView = new MapView(this);
-    graphicsView->setDragMode(QGraphicsView::RubberBandDrag);
-    // graphicsView->setOptimizationFlags(QGraphicsView::DontSavePainterState);
-    graphicsView->setOptimizationFlags(QGraphicsView::DontAdjustForAntialiasing);
-    graphicsView->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
-    graphicsView->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-
-    QBoxLayout *topLayout = new QBoxLayout(QBoxLayout::LeftToRight);
-
-    topLayout->addWidget(graphicsView);
-    setLayout(topLayout);
-
-
-    connect(this, &VisualMap::zoomed, this, &VisualMap::setupMatrix);
-
-    setupMatrix();
+    return me;
 }
 
-QGraphicsView *VisualMap::tileMap() const
-{
-    return static_cast<QGraphicsView *>(graphicsView);
-}
-
-void VisualMap::setupMatrix()
+void MapView::setupMatrix()
 {
     qreal scale = qPow(qreal(2), (zoomLevel - 250) / qreal(50));
     QTransform matrix;
     matrix.scale(scale, scale);
-    graphicsView->setTransform(matrix);
+    setTransform(matrix);
 }
 
 
-void VisualMap::zoomInBy(int level)
+MapView::MapView(QWidget *parent)
+{
+    me = static_cast<QGraphicsView *>(this);
+
+    setDragMode(QGraphicsView::RubberBandDrag);
+    setOptimizationFlags(QGraphicsView::DontSavePainterState);
+    setOptimizationFlags(QGraphicsView::DontAdjustForAntialiasing);
+    setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
+    setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+
+    connect(this, &MapView::zoomed, this, &MapView::setupMatrix);
+    setupMatrix();
+}
+
+void MapView::zoomInBy(int level)
 {
     if (level < 0) return;
     if (zoomLevel <= 500 - level) {
@@ -61,7 +53,7 @@ void VisualMap::zoomInBy(int level)
     }
 }
 
-void VisualMap::zoomOutBy(int level)
+void MapView::zoomOutBy(int level)
 {
     if (level < 0) return;
     if(zoomLevel >= level) {
@@ -73,12 +65,11 @@ void VisualMap::zoomOutBy(int level)
     }
 }
 
-void VisualMap::zoomReset()
+void MapView::zoomReset()
 {
-    graphicsView->resetTransform();
-    // if (zoomLevel != 100) {
-        zoomLevel = 100;
-        emit zoomed();
-    // }
+    resetTransform();
+    zoomLevel = 100;
+
+    emit zoomed();
     update();
 }
