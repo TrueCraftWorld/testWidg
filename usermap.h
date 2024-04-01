@@ -2,13 +2,11 @@
 #define USERMAP_H
 
 #include <array>
-#include <memory>
 #include <QPoint>
 #include <QObject>
 #include <QSize>
 #include <QVector>
 #include <QSharedPointer>
-#include <iostream>
 
 
 enum {UP, RIGHT, DOWN, LEFT};

@@ -26,25 +26,25 @@ bool PathSearch::breadthFirstSearch(QPoint start)
 {
     std::queue<Tile*> knownBorder; //only edge of known area
     std::unordered_set<Tile*> knownTiles; //all known tiles
-    // bool found = false;
+
     Tile* beingCheked = m_graph->tileAt(start.x() + start.y()*m_graph->getWidth());
+    if (beingCheked == nullptr)  return false;
+
     knownBorder.push(beingCheked);
     knownTiles.insert(beingCheked);
-    // unsigned curNumber = 0;
+    beingCheked->setPrevious(beingCheked);
 
-    if (beingCheked != nullptr) beingCheked->setPrevious(beingCheked);
-
-    while (!knownBorder.empty() /*&& (!found)*/) { //no need for exit on targetfound as we need to calculate whole map anyway
+    while (!knownBorder.empty()) { //no need for exit on targetfound as we need to calculate whole map anyway
         beingCheked = knownBorder.front();
-        knownBorder.pop(); // at this point our location in not ON border but inside
+        knownBorder.pop(); // at this point our location is not ON border but inside
         // curNumber = beingCheked->getCoords().x() + beingCheked->getCoords().y() * m_graph->getWidth();
-        for (Tile* foundling : beingCheked->neighbors) {
-            if (foundling != nullptr) { //our neighbors are not walls
-                if (knownTiles.find(foundling) == knownTiles.end()) { // actions only for actually new Tiles
-                    knownTiles.insert(foundling);
-                    knownBorder.push(foundling);
-                    foundling->setPrevious(beingCheked);
-                }
+        for (Tile* foundTile : beingCheked->neighbors) {
+            if (foundTile != nullptr &&
+                knownTiles.find(foundTile) == knownTiles.end() ) { //our neighbors are not walls
+// actions only for actually new Tiles
+                knownTiles.insert(foundTile);
+                knownBorder.push(foundTile);
+                foundTile->setPrevious(beingCheked);
             }
         }
     }

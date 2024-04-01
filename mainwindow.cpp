@@ -27,7 +27,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_map = new UserMap();
     m_map->setParent(this);
-    validator = new QIntValidator(1,1000); //2000 = 10GB RAM used but still works
+    validator = new QIntValidator(1,999); //2000 = 10GB RAM used but still works
+    // validator->
     v_map = new MapView();
     v_map->tileMap()->setScene(scene);
     v_map->tileMap()->setMinimumHeight(600);
@@ -47,20 +48,20 @@ MainWindow::MainWindow(QWidget *parent)
 
     widthEdit = new QLineEdit;
     widthEdit->setValidator(validator);
-    widthEdit->setPlaceholderText(QString("Width"));
-    widthEdit->setText(QString("80"));
+    widthEdit->setPlaceholderText(QString("Max Value - 999"));
+    widthEdit->setText(QString("25"));
     widthEdit->setMaximumWidth(150);
 
 
 
     heightEdit = new QLineEdit;
     heightEdit->setValidator(validator);
-    heightEdit->setPlaceholderText(QString("Height"));
-    heightEdit->setText(QString("80"));
+    heightEdit->setPlaceholderText(QString("Max Value - 999"));
+    heightEdit->setText(QString("25"));
     heightEdit->setMaximumWidth(150);
 
 
-    layoutV->addSpacing(9);
+    // layoutV->addSpacing(9);
 
     layoutV->addWidget(widthEdit);
 
@@ -83,9 +84,9 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(m_map, &UserMap::emptied,
                      this, [this]() {
         v_map->zoomReset();
+        // if (widthEdit->validator()->
         reGenerateMap(widthEdit->displayText().toInt(), heightEdit->displayText().toInt());
-        // v_map->tileMap()->scene()->setSceneRect(v_map->tileMap()->scene()->itemsBoundingRect());
-        // v_map->tileMap()->scene()->update();
+        v_map->scene()->setSceneRect(v_map->tileMap()->scene()->itemsBoundingRect());
         v_map->updateGeometry();
     });
 }
@@ -107,7 +108,11 @@ void MainWindow::createVisual()
     int height = m_map->getHeight();
     int width = m_map->getWidth();
     int count = 0;
-    setMapRegenON(true);
+    setMapRegen(true);
+
+    QVector<VisualTile*> visualTiles;
+    visualTiles.reserve(height * width);
+
     for (int row = 0; row < height; ++row) {
 
         for (int column = 0; column < width; ++column) {
@@ -146,12 +151,16 @@ void MainWindow::createVisual()
             QObject::connect(item, &VisualTile::mouseEntered, m_map, &UserMap::setGoal);
             QObject::connect(item, &VisualTile::mouseLeaved, m_map, &UserMap::unsetGoal);
             QObject::connect(item, &VisualTile::mouseReleased, m_map, &UserMap::resetStart);
-            scene->addItem(static_cast<QGraphicsObject *>(item));
+            visualTiles.append(item);
+
             count++;
-            if (count % 50 == 0) if (row % 20 == 0) QCoreApplication::processEvents();
+            if (count % 50 == 0) QCoreApplication::processEvents();
         }
     }
-    setMapRegenON(false);
+    for (VisualTile* item : visualTiles) {
+        scene->addItem(static_cast<QGraphicsObject*>(item));
+    }
+    setMapRegen(false);
     v_map->tileMap()->centerOn(QPointF(width*25, height*25));
 }
 
@@ -161,12 +170,12 @@ UserMap *MainWindow::getMap()
 }
 
 
-bool MainWindow::isMapRegen()
+bool MainWindow::isMapRegenON()
 {
     return isMapRegen;
 }
 
-void MainWindow::setMapRegenON(bool n_isMapRegen)
+void MainWindow::setMapRegen(bool n_isMapRegen)
 {
     isMapRegen = n_isMapRegen;
 

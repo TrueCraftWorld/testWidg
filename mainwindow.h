@@ -22,8 +22,8 @@ public:
     MainWindow(QWidget *parent = nullptr);
 
     UserMap* getMap();
-    bool isMapRegenON(bool);
-    void setMapRegen();
+    bool isMapRegenON();
+    void setMapRegen(bool);
 
 private:
     bool isMapRegen;

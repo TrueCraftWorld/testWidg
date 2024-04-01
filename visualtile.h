@@ -10,8 +10,6 @@ class VisualTile : public QGraphicsObject
 {
     Q_OBJECT
 public:
-    // VisualTile(const QColor &color, int x, int y, States n_state);
-
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWidget *widget) override;
@@ -32,7 +30,6 @@ private:
     int x;
     int y;
     QColor color;
-    // States m_state;
 };
 
 #endif // VISUALTILE_H
