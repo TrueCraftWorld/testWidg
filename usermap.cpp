@@ -139,7 +139,6 @@ void UserMap::highlightPath(QPoint goal, bool hide)
 {
     Tile* backTrackStart = tileAt(goal.x() + goal.y()*m_size.width());
     if (backTrackStart->getPrevious() == nullptr) { //if path exists it is known, otherwise we know there is no path
-        // std::cout << "fail" << std::endl;
         return;
     }
     backTrackStart = (backTrackStart->getPrevious());
@@ -148,15 +147,11 @@ void UserMap::highlightPath(QPoint goal, bool hide)
         backTrackStart = (backTrackStart->getPrevious());
     }
     backTrackStart->setState(hide ? Tile::States::EMPTY : Tile::States::START);
-    // std::cout << "Success" << std::endl;
 }
 
 void UserMap::unsetGoal(QPoint old_goal)
 {
     Q_UNUSED(old_goal)
-    // if (tileAt(old_goal.x(),old_goal.y())->isWall()) return;
-    // tileAt(old_goal.x(),old_goal.y())->setState(Tile::States::EMPTY);
-    // highlightPath(old_goal, true);
 }
 
 void UserMap::connectMap() {
@@ -255,6 +250,12 @@ void MapGenerator::setSize(QSize size)
 //     emit mapCreated();
 // }
 
+
+/**
+ * @brief MapGenerator::generateMap more maze-like version of random map
+ * @details in all odd row and colums places a wal with a certain chance
+ *          all cells in even row OR even column are not walls
+ */
 void MapGenerator::generateMap()
 {
     if (!gen_size.isValid()) return;
@@ -274,7 +275,6 @@ void MapGenerator::generateMap()
                     wall = true;
                 }
             }
-            if (row == 0 && column == 0)  wall = false;
             QSharedPointer<Tile> tile_ptr (new Tile());
 
             tile_ptr->setCoords(QPoint(column,row));

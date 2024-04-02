@@ -35,13 +35,16 @@ private:
 
     void closeEvent(QCloseEvent *event) override;
 
+    QGraphicsScene *scene;
+    UserMap* m_map;
     MapView *v_map;
+    QPushButton *searchButton;
     QIntValidator *validator;
     QLineEdit *widthEdit;
     QLineEdit *heightEdit;
-    QPushButton *searchButton;
-    QGraphicsScene *scene;
-    UserMap* m_map;
+
+
+
 
 };
 

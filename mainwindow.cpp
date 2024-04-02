@@ -16,46 +16,49 @@
 #include <QThread>
 #include <QCoreApplication>
 #include <QSettings>
+#include <QLabel>
 
 
 MainWindow::MainWindow(QWidget *parent)
-    : QWidget(parent), scene(new QGraphicsScene(this))
-
+    : QWidget(parent),
+      scene(new QGraphicsScene(this)),
+      m_map(new UserMap()),
+      v_map(new MapView()),
+      searchButton(new QPushButton(this)),
+      validator(new QIntValidator(1,999)),
+      widthEdit(new QLineEdit(this)),
+      heightEdit(new QLineEdit(this))
 {
     QSettings settings("CraftWorld", "pathSearch");
-
-    m_map = new UserMap();
     m_map->setParent(this);
-    validator = new QIntValidator(1,999); //2000 = 10GB RAM used but still works
-    // validator->
-    v_map = new MapView();
     v_map->tileMap()->setScene(scene);
-    v_map->tileMap()->setMinimumHeight(600);
-    v_map->tileMap()->setMinimumWidth(600);
-
-
+    v_map->tileMap()->setMinimumHeight(450);
+    v_map->tileMap()->setMinimumWidth(450);
 
     QHBoxLayout *layout = new QHBoxLayout;
     QVBoxLayout *layoutV = new QVBoxLayout;
-    searchButton = new QPushButton;
+
+    searchButton->setCheckable(false);
     searchButton->setText(tr("Generate"));
-    searchButton->setCheckable(true);
-    searchButton->setChecked(true);
     searchButton->setMaximumWidth(150);
 
-    widthEdit = new QLineEdit;
+    QLabel *widthLabel = new QLabel;
+    widthLabel->setText(QString("Width in Tiles"));
     widthEdit->setValidator(validator);
     widthEdit->setPlaceholderText(QString("Max Value - 999"));
-    widthEdit->setText(QString("25"));
+    widthEdit->setText(QString(""));
     widthEdit->setMaximumWidth(150);
 
-    heightEdit = new QLineEdit;
+    QLabel *heightLabel = new QLabel;
+    heightLabel->setText(QString("Height in Tiles"));
     heightEdit->setValidator(validator);
     heightEdit->setPlaceholderText(QString("Max Value - 999"));
-    heightEdit->setText(QString("25"));
+    heightEdit->setText(QString(""));
     heightEdit->setMaximumWidth(150);
 
+    layoutV->addWidget(widthLabel);
     layoutV->addWidget(widthEdit);
+    layoutV->addWidget(heightLabel);
     layoutV->addWidget(heightEdit);
     layoutV->addWidget(searchButton);
     layoutV->addStretch();
@@ -75,23 +78,21 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(m_map, &UserMap::emptied,
                      this, [this]() {
         v_map->zoomReset();
-        // if (widthEdit->validator()->
         reGenerateMap(widthEdit->displayText().toInt(), heightEdit->displayText().toInt());
     });
+    QObject::connect(m_map, &UserMap::mapReady, this, &MainWindow::createVisual);
 }
 
 
 void MainWindow::reGenerateMap(int width, int height)
 {
-
-//    scene->clear();
-    m_map->setSize(QSize(width, height));
-    scene->deleteLater();
     QObject::connect(scene, &QObject::destroyed, this, [this] {
         scene = new QGraphicsScene(this);
+        m_map->create();
+        v_map->setScene(scene);
     });
-    QObject::connect(m_map, &UserMap::mapReady, this, &MainWindow::createVisual);
-    m_map->create();
+    m_map->setSize(QSize(width, height));
+    scene->deleteLater();
 }
 
 void MainWindow::createVisual()
@@ -102,14 +103,13 @@ void MainWindow::createVisual()
     int count = 0;
     setMapRegen(true);
 
-    v_map->setScene(scene);
+    if (scene == nullptr) return;
+
     QVector<VisualTile*> visualTiles;
     visualTiles.reserve(height * width);
 
     for (int row = 0; row < height; ++row) {
-
         for (int column = 0; column < width; ++column) {
-
             tmp = m_map->tileAt(column,row)->isWall();
             QColor color = tmp ? Qt::black : Qt::gray;
             VisualTile *item = new VisualTile();
@@ -172,10 +172,8 @@ bool MainWindow::isMapRegenON()
 void MainWindow::setMapRegen(bool n_isMapRegen)
 {
     isMapRegen = n_isMapRegen;
-
+    searchButton->setEnabled(!isMapRegen);
 }
-
-
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
