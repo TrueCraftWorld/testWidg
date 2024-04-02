@@ -44,15 +44,11 @@ MainWindow::MainWindow(QWidget *parent)
     searchButton->setChecked(true);
     searchButton->setMaximumWidth(150);
 
-
-
     widthEdit = new QLineEdit;
     widthEdit->setValidator(validator);
     widthEdit->setPlaceholderText(QString("Max Value - 999"));
     widthEdit->setText(QString("25"));
     widthEdit->setMaximumWidth(150);
-
-
 
     heightEdit = new QLineEdit;
     heightEdit->setValidator(validator);
@@ -60,11 +56,7 @@ MainWindow::MainWindow(QWidget *parent)
     heightEdit->setText(QString("25"));
     heightEdit->setMaximumWidth(150);
 
-
-    // layoutV->addSpacing(9);
-
     layoutV->addWidget(widthEdit);
-
     layoutV->addWidget(heightEdit);
     layoutV->addWidget(searchButton);
     layoutV->addStretch();
@@ -86,8 +78,6 @@ MainWindow::MainWindow(QWidget *parent)
         v_map->zoomReset();
         // if (widthEdit->validator()->
         reGenerateMap(widthEdit->displayText().toInt(), heightEdit->displayText().toInt());
-        v_map->scene()->setSceneRect(v_map->tileMap()->scene()->itemsBoundingRect());
-        v_map->updateGeometry();
     });
 }
 
@@ -161,6 +151,8 @@ void MainWindow::createVisual()
         scene->addItem(static_cast<QGraphicsObject*>(item));
     }
     setMapRegen(false);
+    v_map->fitInView(0,0, width*50,height*50);
+    v_map->zoomReset();
     v_map->tileMap()->centerOn(QPointF(width*25, height*25));
 }
 
