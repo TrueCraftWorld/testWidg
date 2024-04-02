@@ -15,7 +15,6 @@
 #include <QIntValidator>
 #include <QThread>
 #include <QCoreApplication>
-#include <QEventLoop>
 #include <QSettings>
 
 
@@ -85,9 +84,12 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::reGenerateMap(int width, int height)
 {
 
-    scene->clear();
+//    scene->clear();
     m_map->setSize(QSize(width, height));
-
+    scene->deleteLater();
+    QObject::connect(scene, &QObject::destroyed, this, [this] {
+        scene = new QGraphicsScene(this);
+    });
     QObject::connect(m_map, &UserMap::mapReady, this, &MainWindow::createVisual);
     m_map->create();
 }
@@ -100,6 +102,7 @@ void MainWindow::createVisual()
     int count = 0;
     setMapRegen(true);
 
+    v_map->setScene(scene);
     QVector<VisualTile*> visualTiles;
     visualTiles.reserve(height * width);
 
@@ -144,14 +147,13 @@ void MainWindow::createVisual()
             visualTiles.append(item);
 
             count++;
-            if (count % 50 == 0) QCoreApplication::processEvents();
+            if (count % 25 == 0) QCoreApplication::processEvents();
         }
     }
     for (VisualTile* item : visualTiles) {
         scene->addItem(static_cast<QGraphicsObject*>(item));
     }
     setMapRegen(false);
-    v_map->fitInView(0,0, width*50,height*50);
     v_map->zoomReset();
     v_map->tileMap()->centerOn(QPointF(width*25, height*25));
 }

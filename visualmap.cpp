@@ -68,7 +68,7 @@ void MapView::zoomOutBy(int level)
 void MapView::zoomReset()
 {
     resetTransform();
-    zoomLevel = 100;
+    zoomLevel = 150;
 
     emit zoomed();
     update();
