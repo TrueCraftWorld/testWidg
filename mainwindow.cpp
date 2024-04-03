@@ -1,4 +1,3 @@
-
 #include "usermap.h"
 #include <iostream>
 #include "visualtile.h"
