@@ -51,7 +51,7 @@ bool PathSearch::breadthFirstSearch(QPoint start)
     return true;
 }
 
-bool PathSearch::bFS()
+bool PathSearch::performSearch()
 {
     bool result = breadthFirstSearch(m_start);
     emit pathFound(result);

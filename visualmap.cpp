@@ -18,6 +18,21 @@ QGraphicsView *MapView::tileMap() const
     return me;
 }
 
+void MapView::zoomToFit()
+{
+    // resetMatrix();
+    resetTransform();
+    qreal deltaY = sceneRect().height() / geometry().height();
+    // qreal deltaX = sceneRect().width() / geometry().width();
+    QTransform matrix;
+
+    matrix.scale(1/deltaY, 1/deltaY);
+    setTransform(matrix);
+    qreal power = qLn(1/deltaY)/qLn(2);
+    zoomLevel = static_cast<quint32>((power * qreal(50))+250);
+
+}
+
 void MapView::setupMatrix()
 {
     qreal scale = qPow(qreal(2), (zoomLevel - 250) / qreal(50));

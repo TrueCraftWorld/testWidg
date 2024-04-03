@@ -23,6 +23,7 @@ public:
     void zoomOutBy(int level);
     void zoomReset();
     QGraphicsView *tileMap() const;
+    void zoomToFit(void);
 
 signals:
     void zoomed();

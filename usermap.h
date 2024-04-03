@@ -32,6 +32,9 @@ public:
     States getState();
     void setState(States);
 
+    Tile* getPrevious();
+    void setPrevious(Tile* prev);
+
     std::array<Tile*, 4> neighbors = {nullptr,nullptr,nullptr,nullptr};
 
 signals:
@@ -39,12 +42,6 @@ signals:
 
 private:
     QPoint m_coords;
-
-
-public:
-    Tile* getPrevious();
-    void setPrevious(Tile* prev);
-private:
     Tile* m_previous = nullptr; //inhereting simple tile to add backtracking
     States m_state;
 };
@@ -56,7 +53,7 @@ class UserMap : public QObject
     Q_OBJECT
 public:
     void setSize(QSize size);
-    void create();
+    void populate();
     void search(QPoint);
     void resetStart(QPoint);
     int getWidth();

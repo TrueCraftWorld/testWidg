@@ -10,13 +10,13 @@ class PathSearch : public QObject
 public:
     explicit PathSearch(QObject * parent = nullptr);
     bool breadthFirstSearch(QPoint start);
-    bool bFS();
+    bool performSearch();
 
+    void setGraph(UserMap*);
+    UserMap * getGraph(void);
 
-    void setGraph(UserMap* );
     void setStart(QPoint);
 
-    UserMap * getGraph(void);
 signals:
     void pathFound(bool);
 

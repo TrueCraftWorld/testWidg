@@ -87,7 +87,7 @@ void MainWindow::reGenerateMap(int width, int height)
 {
     QObject::connect(scene, &QObject::destroyed, this, [this] {
         scene = new QGraphicsScene(this);
-        m_map->create();
+        m_map->populate();
         v_map->setScene(scene);
     });
     m_map->setSize(QSize(width, height));
@@ -142,7 +142,7 @@ void MainWindow::createVisual()
             });
             QObject::connect(item, &VisualTile::mouseEntered, m_map, &UserMap::setGoal);
             QObject::connect(item, &VisualTile::mouseLeaved, m_map, &UserMap::unsetGoal);
-            QObject::connect(item, &VisualTile::mouseReleased, m_map, &UserMap::resetStart);
+            QObject::connect(item, &VisualTile::mousePressed, m_map, &UserMap::resetStart);
             visualTiles.append(item);
 
             count++;
@@ -152,9 +152,13 @@ void MainWindow::createVisual()
     for (VisualTile* item : visualTiles) {
         scene->addItem(static_cast<QGraphicsObject*>(item));
     }
+
     setMapRegen(false);
     v_map->zoomReset();
     v_map->tileMap()->centerOn(QPointF(width*25, height*25));
+    v_map->zoomToFit();
+    // v_map->tileMap()->geometry();
+
 }
 
 UserMap *MainWindow::getMap()

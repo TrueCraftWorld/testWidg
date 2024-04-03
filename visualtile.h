@@ -19,12 +19,11 @@ public:
 signals:
     void mouseEntered(QPoint);
     void mouseLeaved(QPoint);
-    void mouseReleased(QPoint);
+    void mousePressed(QPoint);
 
 protected:
     bool event(QEvent *ev) override;
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 
 private:
     int x;

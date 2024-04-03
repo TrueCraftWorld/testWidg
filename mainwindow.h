@@ -26,15 +26,13 @@ public:
     void setMapRegen(bool);
 
 private:
-    bool isMapRegen;
-    void setupMatrix();
+
     void generateMap(int, int);
     void reGenerateMap(int, int);
-    void destroyMap();
     void createVisual();
-
     void closeEvent(QCloseEvent *event) override;
 
+    bool isMapRegen;
     QGraphicsScene *scene;
     UserMap* m_map;
     MapView *v_map;
@@ -42,10 +40,6 @@ private:
     QIntValidator *validator;
     QLineEdit *widthEdit;
     QLineEdit *heightEdit;
-
-
-
-
 };
 
 #endif // MAINWINDOW_H

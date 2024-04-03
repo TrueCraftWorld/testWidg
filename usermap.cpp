@@ -60,7 +60,7 @@ void UserMap::setSize(QSize size)
     m_size = size;
 }
 
-void UserMap::create()
+void UserMap::populate()
 {
     if (!m_size.isValid()) return;
 
@@ -90,7 +90,7 @@ void UserMap::search(QPoint point)
 
     QThread * thread = new QThread();
     pS->moveToThread(thread);
-    QObject::connect(thread, &QThread::started, pS, &PathSearch::bFS);
+    QObject::connect(thread, &QThread::started, pS, &PathSearch::performSearch);
     QObject::connect(thread, &QThread::finished, pS, &QObject::deleteLater);
     QObject::connect(pS, &PathSearch::pathFound, thread, &QThread::quit);
     thread->start();
