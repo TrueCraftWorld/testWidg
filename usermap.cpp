@@ -6,6 +6,7 @@
 #include <QPoint>
 #include <QSize>
 #include <QSharedPointer>
+
 #include <QThread>
 
 
@@ -44,12 +45,12 @@ void Tile::setState(Tile::States state)
 
 
 
-Tile* Tile::getPrevious()
+Tile * Tile::getPrevious()
 {
     return m_previous;
 }
 
-void Tile::setPrevious(Tile* prev)
+void Tile::setPrevious(Tile * prev)
 {
     m_previous = prev;
 }
@@ -124,27 +125,27 @@ int UserMap::getHeight()
     return m_size.height();
 }
 
-Tile* UserMap::tileAt(int index)
+Tile * UserMap::tileAt(int index)
 {
     if (m_tiles.size() <= index) return nullptr;
     return m_tiles.at(index).get();
 }
 
-Tile* UserMap::tileAt(int x, int y)
+Tile * UserMap::tileAt(int x, int y)
 {
     return tileAt(x + (y * m_size.width()) );
 }
 
 void UserMap::highlightPath(QPoint goal, bool hide)
 {
-    Tile* backTrackStart = tileAt(goal.x() + goal.y()*m_size.width());
+    Tile * backTrackStart = tileAt(goal.x() + goal.y()*m_size.width());
     if (backTrackStart->getPrevious() == nullptr) { //if path exists it is known, otherwise we know there is no path
         return;
     }
-    backTrackStart = (backTrackStart->getPrevious());
+    backTrackStart = backTrackStart->getPrevious();
     while (backTrackStart != (backTrackStart->getPrevious())) {
         backTrackStart->setState(hide ? Tile::States::EMPTY : Tile::States::PATH);
-        backTrackStart = (backTrackStart->getPrevious());
+        backTrackStart = backTrackStart->getPrevious();
     }
     backTrackStart->setState(hide ? Tile::States::EMPTY : Tile::States::START);
 }
@@ -159,8 +160,8 @@ void UserMap::connectMap() {
     for (int row = 0; row < m_size.height(); ++row) {
         for (int column = 0; column < m_size.width(); ++column) {
 
-            Tile* tmp = m_tiles.at(column + m_size.width()*row).get();
-            Tile* mbNeighbor = nullptr;
+            Tile * tmp = m_tiles.at(column + m_size.width()*row).get();
+            Tile * mbNeighbor = nullptr;
             if (column > 0) {
                 mbNeighbor = m_tiles.at(column + m_size.width()*row - 1).get();
                 if (!mbNeighbor->isWall())
@@ -225,30 +226,6 @@ void MapGenerator::setSize(QSize size)
 {
     if (size.isValid()) gen_size = size;
 }
-
-// void MapGenerator::generateMap()
-// {
-//     if (!gen_size.isValid()) return;
-
-//     int wall = false;
-//     gen_tiles.reserve(gen_size.width()*gen_size.height());
-//     for (int  row = 0; row < gen_size.height(); ++row) {
-//         for (int column = 0; column < gen_size.width(); ++column) {
-//             if (QRandomGenerator::global()->bounded(100) > 25){
-//                 wall = false;
-//             } else {
-//                 wall = true;
-//             }
-//             if (row == 0 && column == 0)  wall = false;
-//             QSharedPointer<Tile> tile_ptr (new Tile());
-
-//             tile_ptr->setCoords(QPoint(column,row));
-//             tile_ptr->setWall(wall);
-//             gen_tiles.append(tile_ptr);
-//         }
-//     }
-//     emit mapCreated();
-// }
 
 
 /**

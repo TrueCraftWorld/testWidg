@@ -23,13 +23,25 @@ void MapView::zoomToFit()
     // resetMatrix();
     resetTransform();
     qreal deltaY = sceneRect().height() / geometry().height();
-    // qreal deltaX = sceneRect().width() / geometry().width();
+    qreal deltaX = sceneRect().width() / geometry().width();
+    qreal delta =0;
     QTransform matrix;
 
-    matrix.scale(1/deltaY, 1/deltaY);
+    if (deltaX > 1 && deltaY > 1) {
+        delta = deltaX > deltaY ? deltaX : deltaY;
+        delta *= 1.1;
+    } else if (deltaX < 1 && deltaY < 1) {
+        delta = deltaX > deltaY ? deltaX : deltaY;
+        delta *= 0.9;
+    } else {
+        delta = deltaX > deltaY ? deltaY : deltaX;
+    }
+    // delta =
+    matrix.scale((1/delta), (1/delta));
     setTransform(matrix);
-    qreal power = qLn(1/deltaY)/qLn(2);
+    qreal power = qLn(1/delta)/qLn(2);
     zoomLevel = static_cast<quint32>((power * qreal(50))+250);
+
 
 }
 

@@ -149,7 +149,7 @@ void MainWindow::createVisual()
             if (count % 25 == 0) QCoreApplication::processEvents();
         }
     }
-    for (VisualTile* item : visualTiles) {
+    for (auto item : visualTiles) {
         scene->addItem(static_cast<QGraphicsObject*>(item));
     }
 

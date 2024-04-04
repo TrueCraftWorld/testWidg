@@ -32,17 +32,17 @@ public:
     States getState();
     void setState(States);
 
-    Tile* getPrevious();
-    void setPrevious(Tile* prev);
+    Tile * getPrevious();
+    void setPrevious(Tile * prev);
 
-    std::array<Tile*, 4> neighbors = {nullptr,nullptr,nullptr,nullptr};
+    std::array<Tile *, 4> neighbors = {nullptr,nullptr,nullptr,nullptr};
 
 signals:
     void stateChanged();
 
 private:
     QPoint m_coords;
-    Tile* m_previous = nullptr; //inhereting simple tile to add backtracking
+    Tile * m_previous = nullptr; //inhereting simple tile to add backtracking
     States m_state;
 };
 
@@ -58,13 +58,13 @@ public:
     void resetStart(QPoint);
     int getWidth();
     int getHeight();
-    void addTile(QSharedPointer<Tile>);
-    Tile* tileAt(int index);
-    Tile* tileAt(int x, int y);
+    Tile * tileAt(int index);
+    Tile * tileAt(int x, int y);
     void highlightPath(QPoint, bool);
     void setGoal(QPoint);
     void unsetGoal(QPoint);
     QPoint getGoal();
+
     void empty();
 
 signals:
