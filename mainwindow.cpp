@@ -16,6 +16,7 @@
 #include <QCoreApplication>
 #include <QSettings>
 #include <QLabel>
+#include <QtConcurrent/QtConcurrent>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -104,14 +105,14 @@ void MainWindow::createVisual()
 
     if (scene == nullptr) return;
 
-    QVector<VisualTile*> visualTiles;
+    QVector<QPointer<VisualTile>> visualTiles;
     visualTiles.reserve(height * width);
 
     for (int row = 0; row < height; ++row) {
         for (int column = 0; column < width; ++column) {
             tmp = m_map->tileAt(column,row)->isWall();
             QColor color = tmp ? Qt::black : Qt::gray;
-            VisualTile *item = new VisualTile();
+            QPointer<VisualTile> item = new VisualTile();
             item->setColor(color);
             item->setCoords(column, row);
             item->setPos(QPointF((column)*50, (row)*50));
@@ -157,7 +158,6 @@ void MainWindow::createVisual()
     v_map->zoomReset();
     v_map->tileMap()->centerOn(QPointF(width*25, height*25));
     v_map->zoomToFit();
-    // v_map->tileMap()->geometry();
 
 }
 

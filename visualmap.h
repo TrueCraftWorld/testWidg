@@ -33,7 +33,6 @@ private:
     void wheelEvent(QWheelEvent *) override;
     QGraphicsView *me;
     qint32 zoomLevel = 120;
-    qint32 zoomMax = 500;
 };
 
 #endif // VISUALMAP_H

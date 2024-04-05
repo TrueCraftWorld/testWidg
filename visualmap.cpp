@@ -7,9 +7,9 @@
 void MapView::wheelEvent(QWheelEvent *e)
 {
         if (e->angleDelta().y() > 0)
-            zoomInBy(6);
+            zoomInBy(10);
         else
-            zoomOutBy(6);
+            zoomOutBy(10);
         e->accept();
 }
 
@@ -22,19 +22,20 @@ void MapView::zoomToFit()
 {
     // resetMatrix();
     resetTransform();
-    qreal deltaY = sceneRect().height() / geometry().height();
-    qreal deltaX = sceneRect().width() / geometry().width();
+    qreal deltaY = sceneRect().height() / (geometry().height());
+    qreal deltaX = sceneRect().width() / (geometry().width());
     qreal delta =0;
     QTransform matrix;
 
     if (deltaX > 1 && deltaY > 1) {
         delta = deltaX > deltaY ? deltaX : deltaY;
-        delta *= 1.1;
+        delta *= 1.05;
     } else if (deltaX < 1 && deltaY < 1) {
         delta = deltaX > deltaY ? deltaX : deltaY;
-        delta *= 0.9;
+        delta *= 1.05;
     } else {
-        delta = deltaX > deltaY ? deltaY : deltaX;
+        delta = deltaX < deltaY ? deltaY : deltaX;
+        delta *= 1.05;
     }
     // delta =
     matrix.scale((1/delta), (1/delta));
@@ -71,25 +72,27 @@ MapView::MapView(QWidget *parent)
 void MapView::zoomInBy(int level)
 {
     if (level < 0) return;
-    if (zoomLevel <= 500 - level) {
+    if (zoomLevel <= 250 - level) {
+    // if (sceneRect().width()/100 < geometry().width() &&
+    //         sceneRect().height()/100 < geometry().height()) return;
         zoomLevel += level;
         emit zoomed();
-    } else if (zoomLevel < 500) {
-        zoomLevel = 500;
-        emit zoomed();
+    // } else if (zoomLevel < 500) {
+    //     zoomLevel = 500;
+    //     emit zoomed();
     }
 }
 
 void MapView::zoomOutBy(int level)
 {
     if (level < 0) return;
-    if(zoomLevel >= level) {
+
+    qreal scale = qPow(qreal(2), (zoomLevel - 250) / qreal(50));
+    if (sceneRect().width()*scale < geometry().width() &&
+            sceneRect().height()*scale < geometry().height()) return;
+    //restric zooming out if map is completly seen
         zoomLevel -= level;
         emit zoomed();
-    } else if (zoomLevel > 0) {
-        zoomLevel = 0;
-        emit zoomed();
-    }
 }
 
 void MapView::zoomReset()
