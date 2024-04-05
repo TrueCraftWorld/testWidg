@@ -6,8 +6,9 @@
 #include <QObject>
 #include <QSize>
 #include <QVector>
+#include <QList>
 #include <QSharedPointer>
-
+#include <QPointer>
 
 enum {UP, RIGHT, DOWN, LEFT};
 
@@ -32,17 +33,17 @@ public:
     States getState();
     void setState(States);
 
-    Tile * getPrevious();
-    void setPrevious(Tile * prev);
+    QPointer<Tile>  getPrevious();
+    void setPrevious(QPointer<Tile>  prev);
 
-    std::array<Tile *, 4> neighbors = {nullptr,nullptr,nullptr,nullptr};
+    QList<QPointer<Tile>> neighbors;
 
 signals:
     void stateChanged();
 
 private:
     QPoint m_coords;
-    Tile * m_previous = nullptr; //inhereting simple tile to add backtracking
+    QPointer<Tile>  m_previous = nullptr; //inhereting simple tile to add backtracking
     States m_state;
 };
 
@@ -58,8 +59,8 @@ public:
     void resetStart(QPoint);
     int getWidth();
     int getHeight();
-    Tile * tileAt(int index);
-    Tile * tileAt(int x, int y);
+    QPointer<Tile> tileAt(int index);
+    QPointer<Tile> tileAt(int x, int y);
     void highlightPath(QPoint, bool);
     void setGoal(QPoint);
     void unsetGoal(QPoint);

@@ -2,7 +2,6 @@
 
 #include "usermap.h"
 #include <QRandomGenerator>
-#include <memory>
 #include <QPoint>
 #include <QSize>
 #include <QSharedPointer>
@@ -45,12 +44,12 @@ void Tile::setState(Tile::States state)
 
 
 
-Tile * Tile::getPrevious()
+QPointer<Tile> Tile::getPrevious()
 {
     return m_previous;
 }
 
-void Tile::setPrevious(Tile * prev)
+void Tile::setPrevious(QPointer<Tile> prev)
 {
     m_previous = prev;
 }
@@ -125,20 +124,20 @@ int UserMap::getHeight()
     return m_size.height();
 }
 
-Tile * UserMap::tileAt(int index)
+QPointer<Tile> UserMap::tileAt(int index)
 {
     if (m_tiles.size() <= index) return nullptr;
     return m_tiles.at(index).get();
 }
 
-Tile * UserMap::tileAt(int x, int y)
+QPointer<Tile> UserMap::tileAt(int x, int y)
 {
     return tileAt(x + (y * m_size.width()) );
 }
 
 void UserMap::highlightPath(QPoint goal, bool hide)
 {
-    Tile * backTrackStart = tileAt(goal.x() + goal.y()*m_size.width());
+    QPointer<Tile> backTrackStart = tileAt(goal.x() + goal.y()*m_size.width());
     if (backTrackStart->getPrevious() == nullptr) { //if path exists it is known, otherwise we know there is no path
         return;
     }
@@ -160,29 +159,29 @@ void UserMap::connectMap() {
     for (int row = 0; row < m_size.height(); ++row) {
         for (int column = 0; column < m_size.width(); ++column) {
 
-            Tile * tmp = m_tiles.at(column + m_size.width()*row).get();
-            Tile * mbNeighbor = nullptr;
+            QPointer<Tile> tmp = m_tiles.at(column + m_size.width()*row).get();
+            QPointer<Tile> mbNeighbor = nullptr;
             if (column > 0) {
                 mbNeighbor = m_tiles.at(column + m_size.width()*row - 1).get();
                 if (!mbNeighbor->isWall())
-                    tmp->neighbors.at(LEFT) = mbNeighbor;
+                    tmp->neighbors.replace(LEFT, mbNeighbor);
             }
 
             if (column < (m_size.width() - 1)) {
                 mbNeighbor = m_tiles.at(column + m_size.width()*row + 1).get();
                 if (!mbNeighbor->isWall())
-                    tmp->neighbors.at(RIGHT) = mbNeighbor;
+                    tmp->neighbors.replace(RIGHT, mbNeighbor);;
             }
 
             if (row > 0) {
                 mbNeighbor = m_tiles.at(column + m_size.width()*(row - 1)).get();
                 if (!mbNeighbor->isWall())
-                    tmp->neighbors.at(UP) = mbNeighbor;
+                    tmp->neighbors.replace(UP, mbNeighbor);
             }
             if (row < (m_size.height() - 1)) {
                 mbNeighbor = m_tiles.at(column + m_size.width()*(row + 1)).get();
                 if (!mbNeighbor->isWall())
-                    tmp->neighbors.at(DOWN) = mbNeighbor;
+                    tmp->neighbors.replace(DOWN, mbNeighbor);
             }
         }
     }
@@ -256,6 +255,7 @@ void MapGenerator::generateMap()
 
             tile_ptr->setCoords(QPoint(column,row));
             tile_ptr->setWall(wall);
+            tile_ptr->neighbors << nullptr << nullptr << nullptr << nullptr;
             gen_tiles.append(tile_ptr);
         }
     }
