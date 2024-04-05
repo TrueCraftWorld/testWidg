@@ -77,7 +77,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     QObject::connect(m_map, &UserMap::emptied,
                      this, [this]() {
-        v_map->zoomReset();
         reGenerateMap(widthEdit->displayText().toInt(), heightEdit->displayText().toInt());
     });
     QObject::connect(m_map, &UserMap::mapReady, this, &MainWindow::createVisual);
@@ -89,7 +88,7 @@ void MainWindow::reGenerateMap(int width, int height)
     QObject::connect(scene, &QObject::destroyed, this, [this] {
         scene = new QGraphicsScene(this);
         m_map->populate();
-        v_map->setScene(scene);
+
     });
     m_map->setSize(QSize(width, height));
     scene->deleteLater();
@@ -104,7 +103,7 @@ void MainWindow::createVisual()
     setMapRegen(true);
 
     if (scene == nullptr) return;
-
+    v_map->setScene(scene);
     QVector<QPointer<VisualTile>> visualTiles;
     visualTiles.reserve(height * width);
 
@@ -155,9 +154,10 @@ void MainWindow::createVisual()
     }
 
     setMapRegen(false);
-    v_map->zoomReset();
+    // v_map->zoomReset();
     v_map->tileMap()->centerOn(QPointF(width*25, height*25));
     v_map->zoomToFit();
+    v_map->update();
 
 }
 

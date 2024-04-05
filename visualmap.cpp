@@ -73,13 +73,9 @@ void MapView::zoomInBy(int level)
 {
     if (level < 0) return;
     if (zoomLevel <= 250 - level) {
-    // if (sceneRect().width()/100 < geometry().width() &&
-    //         sceneRect().height()/100 < geometry().height()) return;
+        //some max zoom in (about 11x11 tiles at minimum window size)
         zoomLevel += level;
         emit zoomed();
-    // } else if (zoomLevel < 500) {
-    //     zoomLevel = 500;
-    //     emit zoomed();
     }
 }
 
@@ -99,7 +95,6 @@ void MapView::zoomReset()
 {
     resetTransform();
     zoomLevel = 150;
-
     emit zoomed();
     update();
 }

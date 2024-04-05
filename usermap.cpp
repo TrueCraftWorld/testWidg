@@ -5,7 +5,7 @@
 #include <QPoint>
 #include <QSize>
 #include <QSharedPointer>
-
+#include <QtConcurrent/QtConcurrent>
 #include <QThread>
 
 
@@ -62,38 +62,61 @@ void UserMap::setSize(QSize size)
 
 void UserMap::populate()
 {
+    // QVector<QSharedPointer<Tile>>
     if (!m_size.isValid()) return;
+    QThreadPool pool;
+    int chunk = 5000;
+    int totelTiles = m_size.height()*m_size.width();
+    int runs = 0;
+    int tilesToDo;
+    m_tiles.resize(totelTiles);
+    QFutureSynchronizer<void> synchronizer;
+    pool.setMaxThreadCount(6);
+    while (totelTiles) {
 
-    MapGenerator* mG = new MapGenerator();
-    mG->setSize(m_size);
+        if (totelTiles > chunk) {
+            tilesToDo = chunk;
+            totelTiles -= chunk;
+        } else {
+            tilesToDo = totelTiles;
+            totelTiles = 0;
+        }
+        int index = runs*chunk;
+        runs++;
+        synchronizer.addFuture( QtConcurrent::run(&pool,[this, tilesToDo, index](){
+            if (!this->m_size.isValid()) return;
+            int wall = false;
+            // gen_tiles.reserve(chunk);
+            for (int i = index; i < index + tilesToDo; ++i) {
+                wall = false;
+                if (i/this->m_size.width() % 2) {
+                    if (QRandomGenerator::global()->bounded(100) > 55){
+                        wall = true;
+                    }
+                }
+                if (i%this->m_size.width() % 2) {
+                    if (QRandomGenerator::global()->bounded(100) > 45){
+                        wall = true;
+                    }
+                }
+                QSharedPointer<Tile> tile_ptr (new Tile());
 
-    QThread * thread = new QThread();
-    mG->moveToThread(thread);
-    QObject::connect(thread, &QThread::started, mG, &MapGenerator::generateMap);
-    QObject::connect(thread, &QThread::finished, mG, &QObject::deleteLater);
-    QObject::connect(mG, &MapGenerator::mapCreated, this, [this, mG, thread] {
-        m_tiles = mG->returnMap();
-        thread->quit();
-        connectMap();
-
-        emit mapReady();
-    });
-    thread->start();
+                tile_ptr->setCoords(QPoint(i%this->m_size.width(),i/this->m_size.width()));
+                tile_ptr->setWall(wall);
+                tile_ptr->neighbors << nullptr << nullptr << nullptr << nullptr;
+                this->m_tiles[i] = tile_ptr;
+            }
+        }));
+    }
+    synchronizer.waitForFinished();
+    connectMap();
+    emit mapReady();
 }
 
 void UserMap::search(QPoint point)
 {
     m_start = point;
-    PathSearch* pS = new PathSearch();
-    pS->setGraph(this);
-    pS->setStart(point);
-
-    QThread * thread = new QThread();
-    pS->moveToThread(thread);
-    QObject::connect(thread, &QThread::started, pS, &PathSearch::performSearch);
-    QObject::connect(thread, &QThread::finished, pS, &QObject::deleteLater);
-    QObject::connect(pS, &PathSearch::pathFound, thread, &QThread::quit);
-    thread->start();
+    QFuture<bool> future = QtConcurrent::run(PathSearch::breadthFirstSearch, point, this);
 }
 
 void UserMap::resetStart(QPoint point)
@@ -261,3 +284,4 @@ void MapGenerator::generateMap()
     }
     emit mapCreated();
 }
+
