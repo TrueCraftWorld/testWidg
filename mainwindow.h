@@ -13,6 +13,7 @@ class QSplitter;
 class QPushButton;
 class QLineEdit;
 class QIntValidator;
+class QLabel;
 QT_END_NAMESPACE
 
 class MainWindow : public QWidget
@@ -40,6 +41,7 @@ private:
     QIntValidator *validator;
     QLineEdit *widthEdit;
     QLineEdit *heightEdit;
+    QLabel *regenLabel;
 };
 
 #endif // MAINWINDOW_H

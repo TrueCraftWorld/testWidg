@@ -62,16 +62,13 @@ void UserMap::setSize(QSize size)
 
 void UserMap::populate()
 {
-    // QVector<QSharedPointer<Tile>>
     if (!m_size.isValid()) return;
-//    QThreadPool pool;
-    int chunk = 2000;
+    int chunk = 5000;
     int totelTiles = m_size.height()*m_size.width();
     int runs = 0;
     int tilesToDo;
-    m_tiles.resize(totelTiles);
+    m_tiles.resize(totelTiles); //
     QFutureSynchronizer<void> synchronizer;
-//    pool.setMaxThreadCount(6);
     while (totelTiles) {
 
         if (totelTiles > chunk) {
@@ -83,11 +80,10 @@ void UserMap::populate()
         }
         int index = runs*chunk;
         runs++;
-//        synchronizer.addFuture( QtConcurrent::run(&pool,[this, tilesToDo, index](){
-            synchronizer.addFuture( QtConcurrent::run([this, tilesToDo, index](){
+
+        synchronizer.addFuture( QtConcurrent::run([this, tilesToDo, index](){
             if (!this->m_size.isValid()) return;
             int wall = false;
-            // gen_tiles.reserve(chunk);
             for (int i = index; i < index + tilesToDo; ++i) {
                 wall = false;
                 if (i/this->m_size.width() % 2) {
@@ -101,7 +97,6 @@ void UserMap::populate()
                     }
                 }
                 QSharedPointer<Tile> tile_ptr (new Tile());
-
                 tile_ptr->setCoords(QPoint(i%this->m_size.width(),i/this->m_size.width()));
                 tile_ptr->setWall(wall);
                 tile_ptr->neighbors << nullptr << nullptr << nullptr << nullptr;
