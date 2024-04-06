@@ -140,7 +140,7 @@ void MainWindow::createVisual()
                     break;
                 }
                 item->setColor(color);
-                item->update();
+//                item->update();
             });
             QObject::connect(item, &VisualTile::mouseEntered, m_map, &UserMap::setGoal);
             QObject::connect(item, &VisualTile::mouseLeaved, m_map, &UserMap::unsetGoal);
