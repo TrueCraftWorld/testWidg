@@ -107,7 +107,9 @@ void MainWindow::createVisual()
     QVector<QPointer<VisualTile>> visualTiles;
     visualTiles.reserve(height * width);
 
-    for (int row = 0; row < height; ++row) {
+
+
+   for (int row = 0; row < height; ++row) {
         for (int column = 0; column < width; ++column) {
             tmp = m_map->tileAt(column,row)->isWall();
             QColor color = tmp ? Qt::black : Qt::gray;
@@ -149,10 +151,11 @@ void MainWindow::createVisual()
             if (count % 25 == 0) QCoreApplication::processEvents();
         }
     }
+
     for (auto item : visualTiles) {
         scene->addItem(static_cast<QGraphicsObject*>(item));
     }
-
+    scene->update();
     setMapRegen(false);
     // v_map->zoomReset();
     v_map->tileMap()->centerOn(QPointF(width*25, height*25));
