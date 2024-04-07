@@ -24,36 +24,18 @@ void VisualTile::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     Q_UNUSED(widget);
 
     QColor fillColor = color;
-//    QColor fillColor = (option->state & QStyle::State_Selected) ? color.darker(150) : color;
-//    if (option->state & QStyle::State_MouseOver)
-//        fillColor = fillColor.lighter(125);
 
     const qreal lod = option->levelOfDetailFromTransform(painter->worldTransform());
-//    if (lod < 0.2) {
-        if (lod < 0.2) {
-            painter->fillRect(QRectF(0, 0, 50, 50), fillColor);
-            return;
-        }
-
-        QBrush b = painter->brush();
-        painter->setBrush(fillColor);
-        painter->drawRect(1, 1, 48, 48);
-        painter->setBrush(b);
+    if (lod < 0.2) {
+        painter->fillRect(QRectF(0, 0, 50, 50), fillColor);
         return;
-//    }
+    }
 
-//    QPen oldPen = painter->pen();
-//    QPen pen = oldPen;
-//    int width = 0;
-//    if (option->state & QStyle::State_Selected)
-//        width += 2;
-
-//    pen.setWidth(width);
-//    QBrush b = painter->brush();
-//    painter->setBrush(QBrush(fillColor.darker(option->state & QStyle::State_Sunken ? 120 : 100)));
-
-//    painter->drawRect(QRect(3, 3, 44, 44));
-//    painter->setBrush(b);
+    QBrush b = painter->brush();
+    painter->setBrush(fillColor);
+    painter->drawRect(1, 1, 48, 48);
+    painter->setBrush(b);
+    return;
 }
 
 void VisualTile::setColor(const QColor &n_color)
@@ -89,6 +71,5 @@ void VisualTile::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     emit mousePressed(QPoint(x,y));
     QGraphicsItem::mousePressEvent(event);
-
     update();
 }

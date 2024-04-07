@@ -37,7 +37,7 @@ Tile::States Tile::getState()
 
 void Tile::setState(Tile::States state)
 {
-    if (m_state == state) return;
+//    if (m_state == state) return;
     m_state = state;
     emit stateChanged();
 }
@@ -60,6 +60,11 @@ void UserMap::setSize(QSize size)
     m_size = size;
 }
 
+/**
+ * @brief create (width*height) Tiles in multiple threads 
+ * @details splits creation into batches by 5000 pieces
+ *          Tiles are being quazi randomly set as Tile::States::WALL
+ */
 void UserMap::populate()
 {
     if (!m_size.isValid()) return;
@@ -109,20 +114,40 @@ void UserMap::populate()
     emit mapReady();
 }
 
+/**
+ * @brief launches search bFS search in another thread
+ * 
+ * @param point 
+ */
 void UserMap::search(QPoint point)
 {
     m_start = point;
     QFuture<bool> future = QtConcurrent::run(PathSearch::breadthFirstSearch, point, this);
 }
 
+/**
+ * @brief changes start point to given point
+ * @details when given correct input hide current path in scene, calls new search
+ * @param point new start point
+ */
 void UserMap::resetStart(QPoint point)
 {
+    
+    if (m_start == point) return;
     if (tileAt(point.x(), point.y())->isWall()) return;
+    if (point.x() >= m_size.width()  ||
+        point.x() < 0                ||
+        point.y() >= m_size.height() ||
+        point.y() < 0 ) return;
     highlightPath(point, true);
     clearPath();
     search(point);
 }
 
+/**
+ * @brief clears highlithed path
+ * 
+ */
 void UserMap::clearPath()
 {
     for (auto tmp : m_tiles)
@@ -154,6 +179,13 @@ QPointer<Tile> UserMap::tileAt(int x, int y)
     return tileAt(x + (y * m_size.width()) );
 }
 
+/**
+ * @brief hide/highlights path from start to goal if exists
+ * 
+ * @param goal point to hide/higlith path to
+ * @param hide selects hide/hilight path
+ * 
+ */
 void UserMap::highlightPath(QPoint goal, bool hide)
 {
     QPointer<Tile> backTrackStart = tileAt(goal.x() + goal.y()*m_size.width());
@@ -173,6 +205,10 @@ void UserMap::unsetGoal(QPoint old_goal)
     Q_UNUSED(old_goal)
 }
 
+/**
+ * @brief iterates through map in set neighbours field
+ * 
+ */
 void UserMap::connectMap() {
 
     for (int row = 0; row < m_size.height(); ++row) {
@@ -206,9 +242,20 @@ void UserMap::connectMap() {
     }
 }
 
+/**
+ * @brief processes selection of new goal
+ * 
+ * @param goal new goal
+ */
 void UserMap::setGoal(QPoint goal)
 {
-    if (tileAt(goal.x(),goal.y())->isWall()) return;
+
+    if (m_goal == goal) return;
+    if (tileAt(goal.x(), goal.y())->isWall()) return;
+    if (goal.x() >= m_size.width()  ||
+        goal.x() < 0                ||
+        goal.y() >= m_size.height() ||
+        goal.y() < 0 ) return;
 
     tileAt(m_goal.x(),m_goal.y())->setState(Tile::States::EMPTY);
     highlightPath(m_goal, true);
@@ -233,51 +280,4 @@ void UserMap::empty()
     emit emptied();
 }
 
-
-
-QVector<QSharedPointer<Tile> > MapGenerator::returnMap()
-{
-    return gen_tiles;
-}
-
-void MapGenerator::setSize(QSize size)
-{
-    if (size.isValid()) gen_size = size;
-}
-
-
-/**
- * @brief MapGenerator::generateMap more maze-like version of random map
- * @details in all odd row and colums places a wal with a certain chance
- *          all cells in even row OR even column are not walls
- */
-void MapGenerator::generateMap()
-{
-    if (!gen_size.isValid()) return;
-
-    int wall = false;
-    gen_tiles.reserve(gen_size.width() * gen_size.height());
-    for (int  row = 0; row < gen_size.height(); ++row) {
-        for (int column = 0; column < gen_size.width(); ++column) {
-            wall = false;
-            if (row % 2) {
-                if (QRandomGenerator::global()->bounded(100) > 55){
-                    wall = true;
-                }
-            }
-            if (column % 2) {
-                if (QRandomGenerator::global()->bounded(100) > 45){
-                    wall = true;
-                }
-            }
-            QSharedPointer<Tile> tile_ptr (new Tile());
-
-            tile_ptr->setCoords(QPoint(column,row));
-            tile_ptr->setWall(wall);
-            tile_ptr->neighbors << nullptr << nullptr << nullptr << nullptr;
-            gen_tiles.append(tile_ptr);
-        }
-    }
-    emit mapCreated();
-}
 

@@ -12,7 +12,6 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include <QIntValidator>
-#include <QThread>
 #include <QCoreApplication>
 #include <QSettings>
 #include <QLabel>
@@ -58,7 +57,6 @@ MainWindow::MainWindow(QWidget *parent)
     heightEdit->setMaximumWidth(150);
 
     regenLabel->setVisible(false);
-//    regenLabel->setText(QString("Height in Tiles"));
 
     layoutV->addWidget(widthLabel);
     layoutV->addWidget(widthEdit);
@@ -92,18 +90,27 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(m_map, &UserMap::mapReady, this, &MainWindow::createVisual);
 }
 
-
+/**
+ * @brief deletes currentScene and start generatinon of new ones
+ * 
+ * @param width width of new map in Tiles
+ * @param height height of new map in Tiles
+ */
 void MainWindow::reGenerateMap(int width, int height)
 {
     QObject::connect(scene, &QObject::destroyed, this, [this] {
         scene = new QGraphicsScene(this);
-        m_map->populate();
+        m_map->populate();// this will provide backend map
     });
     QCoreApplication::processEvents();//to show map state label
     m_map->setSize(QSize(width, height));
     scene->deleteLater();
 }
 
+/**
+ * @brief creates and sets up neede amount of visualTiles. placing them into sceen
+ * 
+ */
 void MainWindow::createVisual()
 {
     bool tmp;
@@ -111,12 +118,11 @@ void MainWindow::createVisual()
     int width = m_map->getWidth();
     int count = 0;
     regenLabel->setText(QString("Rendering MAP"));
-//    setMapRegen(true);
 
     if (scene == nullptr) return;
 
     scene->setItemIndexMethod(QGraphicsScene::NoIndex); //we need no index but speed of adding item is important
-   for (int row = 0; row < height; ++row) {
+    for (int row = 0; row < height; ++row) {
         for (int column = 0; column < width; ++column) {
             tmp = m_map->tileAt(column,row)->isWall();
             QColor color = tmp ? Qt::black : Qt::gray;
@@ -156,13 +162,11 @@ void MainWindow::createVisual()
             if (count % 30000 == 0) QCoreApplication::processEvents(); //chip example were running good
         }
     }
-   setMapRegen(false);
+    setMapRegen(false);
     v_map->setScene(scene);
-
+//    scene->setItemIndexMethod(QGraphicsScene::BspTreeIndex);
     v_map->tileMap()->centerOn(QPointF(width*25, height*25));
     v_map->zoomToFit();
-//    v_map->update();
-
 }
 
 UserMap *MainWindow::getMap()
@@ -176,6 +180,11 @@ bool MainWindow::isMapRegenON()
     return isMapRegen;
 }
 
+/**
+ * @brief performs needed GUI restriction if n_isMapRegen set
+ * 
+ * @param n_isMapRegen show if map is currently being regenerated
+ */
 void MainWindow::setMapRegen(bool n_isMapRegen)
 {
     isMapRegen = n_isMapRegen;
@@ -187,6 +196,11 @@ void MainWindow::setMapRegen(bool n_isMapRegen)
     regenLabel->update();
 }
 
+/**
+ * @brief save window geometry and passes clise event on
+ * 
+ * @param event 
+ */
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     QSettings settings("CraftWorld", "pathSearch");

@@ -18,6 +18,10 @@ QGraphicsView *MapView::tileMap() const
     return me;
 }
 
+/**
+ * @brief recalculates needed scene scale to fit whole map. 
+ * 
+ */
 void MapView::zoomToFit()
 {
     // resetMatrix();
@@ -42,10 +46,12 @@ void MapView::zoomToFit()
     setTransform(matrix);
     qreal power = qLn(1/delta)/qLn(2);
     zoomLevel = static_cast<quint32>((power * qreal(50))+250);
-
-
 }
 
+/**
+ * @brief scales current scene using zoomLevel
+ * 
+ */
 void MapView::setupMatrix()
 {
     qreal scale = qPow(qreal(2), (zoomLevel - 250) / qreal(50));
@@ -69,6 +75,11 @@ MapView::MapView(QWidget *parent)
     setupMatrix();
 }
 
+/**
+ * @brief zooms in scene to some limit
+ * 
+ * @param level 
+ */
 void MapView::zoomInBy(int level)
 {
     if (level < 0) return;
@@ -79,6 +90,12 @@ void MapView::zoomInBy(int level)
     }
 }
 
+/**
+ * @brief zooms out current scene
+ * @details zooming out stops if all visualTiles are seen
+ * 
+ * @param level zoom step
+ */
 void MapView::zoomOutBy(int level)
 {
     if (level < 0) return;
@@ -87,8 +104,8 @@ void MapView::zoomOutBy(int level)
     if (sceneRect().width()*scale < geometry().width() &&
             sceneRect().height()*scale < geometry().height()) return;
     //restric zooming out if map is completly seen
-        zoomLevel -= level;
-        emit zoomed();
+    zoomLevel -= level;
+    emit zoomed();
 }
 
 void MapView::zoomReset()

@@ -81,20 +81,6 @@ private:
     void clearPath();
 };
 
-class MapGenerator : public QObject
-{
-    Q_OBJECT
-public:
-    void setSize(QSize);
-    void generateMap();
-    QVector<QSharedPointer<Tile>> returnMap();
-private:
-    QSize gen_size;
-    QVector<QSharedPointer<Tile>> gen_tiles;
-signals:
-    void mapCreated();
-};
-
 
 
 #endif // USERMAP_H
