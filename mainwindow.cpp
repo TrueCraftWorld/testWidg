@@ -16,6 +16,7 @@
 #include <QSettings>
 #include <QLabel>
 #include <QtConcurrent/QtConcurrent>
+#include <QMessageBox>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -78,6 +79,15 @@ MainWindow::MainWindow(QWidget *parent)
 
     QObject::connect(searchButton, &QPushButton::clicked,
                      this, [this](){
+        QSize n_size(widthEdit->displayText().toInt(), heightEdit->displayText().toInt());
+        if (n_size.isEmpty()) {
+            QMessageBox msgBox;
+            msgBox.setText("Size of the map is not valid");
+            msgBox.setInformativeText("width and heigth need to be positive");
+            msgBox.setStandardButtons(QMessageBox::Close);
+            msgBox.exec();
+            return;
+        }
         setMapRegen(true);
     });
     QObject::connect(searchButton, &QPushButton::clicked, m_map, &UserMap::empty);
@@ -97,6 +107,7 @@ MainWindow::MainWindow(QWidget *parent)
  */
 void MainWindow::reGenerateMap(int width, int height)
 {
+
     QObject::connect(scene, &QObject::destroyed, this, [this] {
         scene = new QGraphicsScene(this);
         QCoreApplication::processEvents();
