@@ -164,7 +164,7 @@ void MainWindow::createVisual()
     }
     setMapRegen(false);
     v_map->setScene(scene);
-//    scene->setItemIndexMethod(QGraphicsScene::BspTreeIndex);
+    // scene->setItemIndexMethod(QGraphicsScene::BspTreeIndex);
     v_map->tileMap()->centerOn(QPointF(width*25, height*25));
     v_map->zoomToFit();
 }
