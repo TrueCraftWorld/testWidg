@@ -37,7 +37,6 @@ Tile::States Tile::getState()
 
 void Tile::setState(Tile::States state)
 {
-//    if (m_state == state) return;
     m_state = state;
     emit stateChanged();
 }
@@ -55,6 +54,12 @@ void Tile::setPrevious(QPointer<Tile> prev)
 }
 
 
+UserMap::UserMap(QObject *parent)
+{
+    Q_UNUSED(parent)
+    QObject::connect(this, &UserMap::mapPartReady, this, &UserMap::checkMapCreation);
+}
+
 void UserMap::setSize(QSize size)
 {
     m_size = size;
@@ -68,24 +73,19 @@ void UserMap::setSize(QSize size)
 void UserMap::populate()
 {
     if (!m_size.isValid()) return;
-    int chunk = 5000;
+
     int totelTiles = m_size.height()*m_size.width();
-    int runs = 0;
     int tilesToDo;
     m_tiles.resize(totelTiles); //
+    int numThreads = QThread::idealThreadCount(); // noexept always returns at least 1
+    m_mapParts = numThreads;
+    int chunk = totelTiles / numThreads;
+    int index = 0;
     QFutureSynchronizer<void> synchronizer;
-    while (totelTiles) {
+    for (int i = 0; i < numThreads; ++i) {
 
-        if (totelTiles > chunk) {
-            tilesToDo = chunk;
-            totelTiles -= chunk;
-        } else {
-            tilesToDo = totelTiles;
-            totelTiles = 0;
-        }
-        int index = runs*chunk;
-        runs++;
-
+        tilesToDo = chunk;
+        if (i == 0 && numThreads != 1) tilesToDo += totelTiles % numThreads; //округлённые при делении тайлы в первый поток
         synchronizer.addFuture( QtConcurrent::run([this, tilesToDo, index](){
             if (!this->m_size.isValid()) return;
             int wall = false;
@@ -107,11 +107,14 @@ void UserMap::populate()
                 tile_ptr->neighbors << nullptr << nullptr << nullptr << nullptr;
                 this->m_tiles[i] = tile_ptr;
             }
+            emit this->mapPartReady();
         }));
+        index += tilesToDo;
     }
-    synchronizer.waitForFinished();
-    connectMap();
-    emit mapReady();
+    // setThreadWaiting(numThreads);
+    // synchronizer.waitForFinished();
+    // connectMap();
+    // emit mapReady();
 }
 
 /**
@@ -156,6 +159,14 @@ void UserMap::clearPath()
         if (tmp.get()->getState() != Tile::States::WALL)
             tmp.get()->setState(Tile::States::EMPTY);
     }
+}
+
+void UserMap::checkMapCreation()
+{
+    if (m_mapParts == 0) return;
+    m_mapParts--;
+    if (m_mapParts != 0) return;
+    QFuture<void> someFuture = QtConcurrent::run(this, &UserMap::connectMap);
 }
 
 int UserMap::getWidth()
@@ -240,6 +251,7 @@ void UserMap::connectMap() {
             }
         }
     }
+    emit mapReady();
 }
 
 /**

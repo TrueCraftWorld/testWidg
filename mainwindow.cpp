@@ -79,9 +79,8 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(searchButton, &QPushButton::clicked,
                      this, [this](){
         setMapRegen(true);
-        this->m_map->empty();
     });
-
+    QObject::connect(searchButton, &QPushButton::clicked, m_map, &UserMap::empty);
     QObject::connect(m_map, &UserMap::emptied,
                      this, [this]() {
 
@@ -100,6 +99,7 @@ void MainWindow::reGenerateMap(int width, int height)
 {
     QObject::connect(scene, &QObject::destroyed, this, [this] {
         scene = new QGraphicsScene(this);
+        QCoreApplication::processEvents();
         m_map->populate();// this will provide backend map
     });
     QCoreApplication::processEvents();//to show map state label
@@ -129,7 +129,7 @@ void MainWindow::createVisual()
             QPointer<VisualTile> item = new VisualTile();
             item->setColor(color);
             item->setCoords(column, row);
-            item->setPos(QPointF((column)*50, (row)*50));
+            item->setPos(QPointF((column)*tileSize, (row)*tileSize));
             QObject::connect(m_map->tileAt(column,row), &Tile::stateChanged, item, [item, this, column, row](){
                 QColor color;
                 switch (this->m_map->tileAt(column,row)->getState()) {
@@ -159,25 +159,18 @@ void MainWindow::createVisual()
             QObject::connect(item, &VisualTile::mousePressed, m_map, &UserMap::resetStart);
             scene->addItem(static_cast<QGraphicsObject*>(item));
             count++;
-            if (count % 30000 == 0) QCoreApplication::processEvents(); //chip example were running good
+            if (count % 15000 == 0) QCoreApplication::processEvents(); //chip example were running good
         }
     }
     setMapRegen(false);
     v_map->setScene(scene);
-    // scene->setItemIndexMethod(QGraphicsScene::BspTreeIndex);
-    v_map->tileMap()->centerOn(QPointF(width*25, height*25));
+    v_map->tileMap()->centerOn(QPointF((width*tileSize)/2, (height*tileSize)/2));
     v_map->zoomToFit();
 }
 
 UserMap *MainWindow::getMap()
 {
     return m_map;
-}
-
-
-bool MainWindow::isMapRegenON()
-{
-    return isMapRegen;
 }
 
 /**

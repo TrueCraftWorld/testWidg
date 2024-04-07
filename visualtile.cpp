@@ -9,13 +9,13 @@
 
 QRectF VisualTile::boundingRect() const
 {
-    return QRectF(0, 0, 50, 50);
+    return QRectF(0, 0, tileSize, tileSize);
 }
 
 QPainterPath VisualTile::shape() const
 {
     QPainterPath path;
-    path.addRect(1, 1, 48, 48);
+    path.addRect(1, 1, tileSize-2, tileSize-2);
     return path;
 }
 
@@ -27,13 +27,13 @@ void VisualTile::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 
     const qreal lod = option->levelOfDetailFromTransform(painter->worldTransform());
     if (lod < 0.2) {
-        painter->fillRect(QRectF(0, 0, 50, 50), fillColor);
+        painter->fillRect(QRectF(0, 0, tileSize, tileSize), fillColor);
         return;
     }
 
     QBrush b = painter->brush();
     painter->setBrush(fillColor);
-    painter->drawRect(1, 1, 48, 48);
+    painter->drawRect(1, 1, tileSize-2, tileSize-2);
     painter->setBrush(b);
     return;
 }

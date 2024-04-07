@@ -53,6 +53,7 @@ class UserMap : public QObject
 {
     Q_OBJECT
 public:
+    explicit UserMap(QObject * parent = nullptr);
     void setSize(QSize size);
     void populate();
     void search(QPoint);
@@ -70,6 +71,7 @@ public:
 
 signals:
     void emptied();
+    void mapPartReady();
     void mapReady();
 
 private:
@@ -77,8 +79,10 @@ private:
     QSize m_size;
     QPoint m_goal;
     QPoint m_start;
+    unsigned m_mapParts;
     void connectMap();
     void clearPath();
+    void checkMapCreation();
 };
 
 
