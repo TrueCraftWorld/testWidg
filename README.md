@@ -1,5 +1,5 @@
 PathFinding Example.
-generates renadom maze-like map of a given size and performs pathfinding on it. (BFS search used)
+generates random maze-like map of a given size and performs pathfinding on it. (BFS search used)
 
 Usage:
 Enter width and hight to corresponding fields/
