@@ -13,6 +13,7 @@ class QSplitter;
 class QPushButton;
 class QLineEdit;
 class QIntValidator;
+class QLabel;
 QT_END_NAMESPACE
 
 class MainWindow : public QWidget
@@ -22,7 +23,6 @@ public:
     MainWindow(QWidget *parent = nullptr);
 
     UserMap* getMap();
-    bool isMapRegenON();
     void setMapRegen(bool);
 
 private:
@@ -40,6 +40,9 @@ private:
     QIntValidator *validator;
     QLineEdit *widthEdit;
     QLineEdit *heightEdit;
+    QLabel *regenLabel;
+
+
 };
 
 #endif // MAINWINDOW_H

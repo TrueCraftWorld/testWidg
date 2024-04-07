@@ -4,7 +4,7 @@
 #include <QColor>
 #include <QGraphicsObject>
 
-
+int constexpr tileSize = 20;
 
 class VisualTile : public QGraphicsObject
 {

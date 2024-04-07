@@ -12,7 +12,6 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include <QIntValidator>
-#include <QThread>
 #include <QCoreApplication>
 #include <QSettings>
 #include <QLabel>
@@ -27,7 +26,8 @@ MainWindow::MainWindow(QWidget *parent)
       searchButton(new QPushButton(this)),
       validator(new QIntValidator(1,999)),
       widthEdit(new QLineEdit(this)),
-      heightEdit(new QLineEdit(this))
+      heightEdit(new QLineEdit(this)),
+      regenLabel(new QLabel(this))
 {
     QSettings settings("CraftWorld", "pathSearch");
     m_map->setParent(this);
@@ -56,11 +56,15 @@ MainWindow::MainWindow(QWidget *parent)
     heightEdit->setText(QString(""));
     heightEdit->setMaximumWidth(150);
 
+    regenLabel->setVisible(false);
+
     layoutV->addWidget(widthLabel);
     layoutV->addWidget(widthEdit);
     layoutV->addWidget(heightLabel);
     layoutV->addWidget(heightEdit);
     layoutV->addWidget(searchButton);
+    layoutV->addStretch();
+    layoutV->addWidget(regenLabel);
     layoutV->addStretch();
 
     layout->addWidget(v_map);
@@ -73,41 +77,51 @@ MainWindow::MainWindow(QWidget *parent)
     this->restoreGeometry(settings.value("geometry").toByteArray());
 
     QObject::connect(searchButton, &QPushButton::clicked,
-                     m_map, &UserMap::empty);
-
+                     this, [this](){
+        setMapRegen(true);
+    });
+    QObject::connect(searchButton, &QPushButton::clicked, m_map, &UserMap::empty);
     QObject::connect(m_map, &UserMap::emptied,
                      this, [this]() {
-        v_map->zoomReset();
+
         reGenerateMap(widthEdit->displayText().toInt(), heightEdit->displayText().toInt());
     });
     QObject::connect(m_map, &UserMap::mapReady, this, &MainWindow::createVisual);
 }
 
-
+/**
+ * @brief deletes currentScene and start generatinon of new ones
+ * 
+ * @param width width of new map in Tiles
+ * @param height height of new map in Tiles
+ */
 void MainWindow::reGenerateMap(int width, int height)
 {
     QObject::connect(scene, &QObject::destroyed, this, [this] {
         scene = new QGraphicsScene(this);
-        m_map->populate();
-        v_map->setScene(scene);
+        QCoreApplication::processEvents();
+        m_map->populate();// this will provide backend map
     });
+    QCoreApplication::processEvents();//to show map state label
     m_map->setSize(QSize(width, height));
     scene->deleteLater();
 }
 
+/**
+ * @brief creates and sets up neede amount of visualTiles. placing them into sceen
+ * 
+ */
 void MainWindow::createVisual()
 {
     bool tmp;
     int height = m_map->getHeight();
     int width = m_map->getWidth();
     int count = 0;
-    setMapRegen(true);
+    regenLabel->setText(QString("Rendering MAP"));
 
     if (scene == nullptr) return;
 
-    QVector<QPointer<VisualTile>> visualTiles;
-    visualTiles.reserve(height * width);
-
+    scene->setItemIndexMethod(QGraphicsScene::NoIndex); //we need no index but speed of adding item is important
     for (int row = 0; row < height; ++row) {
         for (int column = 0; column < width; ++column) {
             tmp = m_map->tileAt(column,row)->isWall();
@@ -115,8 +129,7 @@ void MainWindow::createVisual()
             QPointer<VisualTile> item = new VisualTile();
             item->setColor(color);
             item->setCoords(column, row);
-            item->setPos(QPointF((column)*50, (row)*50));
-
+            item->setPos(QPointF((column)*tileSize, (row)*tileSize));
             QObject::connect(m_map->tileAt(column,row), &Tile::stateChanged, item, [item, this, column, row](){
                 QColor color;
                 switch (this->m_map->tileAt(column,row)->getState()) {
@@ -144,21 +157,15 @@ void MainWindow::createVisual()
             QObject::connect(item, &VisualTile::mouseEntered, m_map, &UserMap::setGoal);
             QObject::connect(item, &VisualTile::mouseLeaved, m_map, &UserMap::unsetGoal);
             QObject::connect(item, &VisualTile::mousePressed, m_map, &UserMap::resetStart);
-            visualTiles.append(item);
-
+            scene->addItem(static_cast<QGraphicsObject*>(item));
             count++;
-            if (count % 25 == 0) QCoreApplication::processEvents();
+            if (count % 15000 == 0) QCoreApplication::processEvents(); //chip example were running good
         }
     }
-    for (auto item : visualTiles) {
-        scene->addItem(static_cast<QGraphicsObject*>(item));
-    }
-
     setMapRegen(false);
-    v_map->zoomReset();
-    v_map->tileMap()->centerOn(QPointF(width*25, height*25));
+    v_map->setScene(scene);
+    v_map->tileMap()->centerOn(QPointF((width*tileSize)/2, (height*tileSize)/2));
     v_map->zoomToFit();
-
 }
 
 UserMap *MainWindow::getMap()
@@ -166,18 +173,27 @@ UserMap *MainWindow::getMap()
     return m_map;
 }
 
-
-bool MainWindow::isMapRegenON()
-{
-    return isMapRegen;
-}
-
+/**
+ * @brief performs needed GUI restriction if n_isMapRegen set
+ * 
+ * @param n_isMapRegen show if map is currently being regenerated
+ */
 void MainWindow::setMapRegen(bool n_isMapRegen)
 {
     isMapRegen = n_isMapRegen;
     searchButton->setEnabled(!isMapRegen);
+    widthEdit->setReadOnly(isMapRegen);
+    heightEdit->setReadOnly(isMapRegen);
+    if (isMapRegen) regenLabel->setText(QString("Generating MAP"));
+    regenLabel->setVisible(isMapRegen);
+    regenLabel->update();
 }
 
+/**
+ * @brief save window geometry and passes clise event on
+ * 
+ * @param event 
+ */
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     QSettings settings("CraftWorld", "pathSearch");

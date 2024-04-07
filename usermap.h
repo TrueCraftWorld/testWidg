@@ -53,6 +53,7 @@ class UserMap : public QObject
 {
     Q_OBJECT
 public:
+    explicit UserMap(QObject * parent = nullptr);
     void setSize(QSize size);
     void populate();
     void search(QPoint);
@@ -70,6 +71,7 @@ public:
 
 signals:
     void emptied();
+    void mapPartReady();
     void mapReady();
 
 private:
@@ -77,23 +79,12 @@ private:
     QSize m_size;
     QPoint m_goal;
     QPoint m_start;
+    unsigned m_mapParts;
     void connectMap();
     void clearPath();
+    void checkMapCreation();
 };
 
-class MapGenerator : public QObject
-{
-    Q_OBJECT
-public:
-    void setSize(QSize);
-    void generateMap();
-    QVector<QSharedPointer<Tile>> returnMap();
-private:
-    QSize gen_size;
-    QVector<QSharedPointer<Tile>> gen_tiles;
-signals:
-    void mapCreated();
-};
 
 
 #endif // USERMAP_H
